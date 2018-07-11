@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>MCLab Inventory Management</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Bootstrap core -->
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+
+</head>
+
+<body>
+ <h1>{% if is_admin %} Prima pagine amministratore! {% else %} Prima pagina utente! {% endif %}</h1>
+<a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
+</body>
+</html>

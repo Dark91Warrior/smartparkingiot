@@ -1,0 +1,26 @@
+{% extends 'base_login.html' %}
+{% block login %}
+<div class="my-5">
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div>
+                    <img src="{{ url_for('static', filename='img/logo.jpg') }}" class="img-fluid" alt="MCLab">
+                </div>
+                <br>
+                <h2 class="text-center">Inventory Management Systems</h2><br>
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <br>
+                <h2 class="text-center">Il tuo profilo è in attesa di convalida. <br>Contattare l'amministratore per accelerare i tempi di attivazione.</h2><br>
+                <hr>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base_login.html' %}
+{% block login %}
+<div class="my-5">
+    <form class="form-horizontal" role="form" method="POST" action="{{ url_for("auth.register") }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div>
+                    <img src="{{ url_for('static', filename='img/logo.jpg') }}" class="img-fluid" alt="MCLab">
+                </div>
+                <br>
+                <h2 class="text-center">Inventory Management Systems</h2><br>
+                <hr>
+            </div>
+        </div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="text-align: center">
+                        <p style="color: #ff6f00">{{ message }}</p>
+                    </div>
+                    <br>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+            <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="form-group has-danger">
+                    <label class="sr-only" for="nome">Nome</label>
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-user"></i></div>
+                        {{ form.nome(class="form-control", placeholder="Nome", pattern=".{2,}", title="Minimo 2 caratteri e massimo 50", required=True, autofocus=True) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>
+            <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="form-group has-danger">
+                    <label class="sr-only" for="email">Cognome</label>
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-user"></i></div>
+                        {{ form.cognome(class="form-control", placeholder="Cognome", pattern=".{2,25}", title="Minimo 2 caratteri e massimo 25", required=True, autofocus=True) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="form-group has-danger">
+                    <label class="sr-only" for="email">E-Mail</label>
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-at"></i></div>
+                        {{ form.email(class="form-control", placeholder="you@example.com",pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$", title="Inserire una mail corretta", required=True, autofocus=True) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="sr-only" for="password">Password</label>
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
+                        {{ form.password(class="form-control", placeholder="Password", pattern=".{5,}", title="Minimo 5 caratteri", required=True) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="sr-only" for="password">Confirm Password</label>
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-key"></i></div>
+                        {{ form.confirm_password(class="form-control", placeholder="Confirm Password", pattern=".{5,}", title="Minimo 5 caratteri", required=True) }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>
+        <div class="row" style="padding-top: 1rem">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-sign-in"></i> Conferma</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
