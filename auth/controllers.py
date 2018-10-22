@@ -56,6 +56,7 @@ def insert_user(form):
             u.cognome = form.cognome.data
             u.password = hashlib.sha1(form.password.data).hexdigest()
             u.email = form.email.data
+            u.tariffa = form.tariffa.data
             u.put()
             return True
 

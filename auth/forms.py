@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, PasswordField, validators
+from wtforms import Form, StringField, PasswordField, validators, SelectField
 
 
 class UserLoginForm(Form):
@@ -12,6 +12,9 @@ class UserRegistrationForm(Form):
     email = StringField('email', [validators.DataRequired()])
     password = PasswordField('password', [validators.DataRequired(), validators.Length(min=5)])
     confirm_password = PasswordField('confirm_password', [validators.DataRequired(), validators.Length(min=5)])
+    my_choices = [('1', 'Tariffa 1'), ('2', 'Tariffa 2'), ('3', 'Tariffa 3')]
+    tariffa = SelectField('tariffa', choices=my_choices)
+
 
 
 class UserInfoModify(Form):

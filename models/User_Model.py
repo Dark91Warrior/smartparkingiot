@@ -10,3 +10,4 @@ class User(UserMixin, ndb.Model):
     password = ndb.StringProperty(required=True)
     has_superuser = ndb.BooleanProperty(default=False)
     is_valid = ndb.BooleanProperty(default=False)
+    tariffa = ndb.StringProperty()
