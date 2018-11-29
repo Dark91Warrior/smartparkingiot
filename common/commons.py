@@ -7,7 +7,7 @@ import yaml
 DEFAULT_SENDER = 'cla.mar92@gmail.com'
 
 def get_username(session):
-    return session['user']['nome'][0].upper()+'. '+session['user']['cognome'].capitalize()
+    return session['user']['nome'].capitalize() + ' ' + session['user']['cognome'].capitalize()
 
 
 def send_reset_pwd(form):

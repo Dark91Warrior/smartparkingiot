@@ -91,14 +91,51 @@ def update_user(user_id, type, form=None):
 #############################
 
 
-def delete_user(id):
+def delete_user(name, surname):
     try:
         # ndb.delete_multi(Models.Categorie.query(Models.Categorie.categoriaID == id).fetch(keys_only=True).get())
-        User().query(User.uuid == id).fetch(1, keys_only=True)[0].get().key.delete()
+        User().query(User.nome == name and User.cognome == surname).fetch(1)[0].key.delete()
         return 'Utente rimosso!'
     except:
         return "Errore nell'eliminazione dell'utente!"
 
+def delete_user_from_uuid(uuid):
+    try:
+        # ndb.delete_multi(Models.Categorie.query(Models.Categorie.categoriaID == id).fetch(keys_only=True).get())
+        User().query(User.uuid == uuid).fetch(1)[0].key.delete()
+        return True
+    except:
+        return False
+
+def auth_user(name, surname):
+    try:
+        # ndb.delete_multi(Models.Categorie.query(Models.Categorie.categoriaID == id).fetch(keys_only=True).get())
+        usr = User().query(User.nome == name and User.cognome == surname).fetch(1)[0]
+        usr.is_valid = True
+        usr.put()
+        return 'Utente abilitato!'
+    except:
+        return "Errore nell'abilitazione dell'utente!"
+
+def admin_user(name, surname):
+    try:
+        # ndb.delete_multi(Models.Categorie.query(Models.Categorie.categoriaID == id).fetch(keys_only=True).get())
+        usr = User().query(User.nome == name and User.cognome == surname).fetch(1)[0]
+        usr.has_superuser = True
+        usr.put()
+        return 'Utente admin!'
+    except:
+        return "Errore nell'admin dell'utente!"
+
+def change_targa(uuid, targa):
+    try:
+        # ndb.delete_multi(Models.Categorie.query(Models.Categorie.categoriaID == id).fetch(keys_only=True).get())
+        usr = User().query(User.uuid == uuid).fetch(1)[0]
+        usr.targa = targa
+        usr.put()
+        return True
+    except:
+        return False
 
 ####################################
 #              utils               #

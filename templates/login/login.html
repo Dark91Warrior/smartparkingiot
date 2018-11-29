@@ -1,5 +1,26 @@
-{% extends 'base_login.html' %}
-{% block login %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Smart Parking</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Bootstrap core -->
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/jquery-3.3.1.js') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/popper.js') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/bootstrap.js') }}" rel="stylesheet">
+
+</head>
+
+<body>
     <div class="my-5">
         <form class="form-horizontal" role="form" method="POST" action="{{ url_for("auth.login") }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -22,6 +43,7 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
+            <div class="container">
             <div class="row" style="margin-top: 10%">
                 <div class="col-md-3"></div>
                 <div class="col-md-6">
@@ -58,14 +80,16 @@
             <div class="row" style="padding-top: 1rem" align="center">
                 <div class="col-md-3"></div>
                 <div class="col-md-6">
-                    <button type="submit" class="btn btn-primary" style="background-color: #4D4D4F"><i class="fa fa-sign-in"></i> Login</button>
+                    <button type="submit" class="btn btn-primary" style="background-color: #4D4D4F"><i class="fa fa-sign-in"></i><b style="font-size: large"> Login</b> </button>
                     <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="background-color: #4D4D4F"><i class="fa fa-user-plus"></i>
-                        Sign Up</a>
+                        <b style="font-size: large">Sign Up</b></a>
                 </div>
                 <div class="col-md-3">
-                    <a class="btn btn-link" href="{{ url_for('auth.pwd_recovery') }}">Forgot Your Password?</a>
+                    <a class="btn btn-link" href="{{ url_for('auth.pwd_recovery') }}" style="font-size: large">Forgot Your Password?</a>
                 </div>
             </div>
+                </div>
         </form>
     </div>
-{% endblock %}
+</body>
+</html>

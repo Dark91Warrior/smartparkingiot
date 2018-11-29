@@ -6,6 +6,9 @@ from flask import *
 from forms import UserLoginForm, UserRegistrationForm, PwdRecoveryForm
 from models.User_Model import User
 from models.Log_Model import Log
+from models.Tariffe_Model import Tariffa
+from data_access import DataAccess as DA
+import json
 
 auth = Blueprint('auth', __name__)
 
@@ -57,6 +60,7 @@ def insert_user(form):
             u.password = hashlib.sha1(form.password.data).hexdigest()
             u.email = form.email.data
             u.tariffa = form.tariffa.data
+            u.targa = form.targa.data
             u.put()
             return True
 
@@ -80,7 +84,7 @@ def login():
                 if session['user']['active']:
                     logging(session['user']['user_id'], 'LOGIN')
                     if session['user']['superuser'] == True:
-                        return redirect(url_for('main.index'))
+                        return redirect(url_for('admin.index'))
 
                     return redirect(url_for('main.index'))
                 else:
@@ -95,7 +99,7 @@ def login():
                 if session['user']['authenticated'] == True and session['user']['superuser'] == False:
                     return redirect(url_for('main.index'))
                 elif session['user']['authenticated'] == True and session['user']['superuser'] == True:
-                    return redirect(url_for('main.index'))
+                    return redirect(url_for('admin.index'))
             else:
                 return render_template('login/not_allowed.html')
 
@@ -108,16 +112,32 @@ def register():
         if request.form['password'] != request.form['confirm_password']:
             flash('Le password inserite sono diverse!')
             return redirect(url_for('auth.register'))
-
         form = UserRegistrationForm(request.form)
+
+        # per il check del form devo guardare anche le tariffe
+        tariffe = Tariffa.query().fetch()
+        my_choices = []
+        for i, tar in enumerate(tariffe):
+            my_choices.append((str(i + 1), tar.tariffa))
+        form.tariffa.choices = my_choices
+
         if form.validate():
             if insert_user(form):
+                flash('Registrazione eseguita!')
                 return redirect(url_for('auth.login'))
             else:
                 flash('Registration error!')
                 return redirect(url_for('auth.registration'))
     else:
-        return render_template('login/registration.html', form=UserRegistrationForm())
+        form = UserRegistrationForm()
+
+        tariffe = Tariffa.query().order(Tariffa.order).fetch()
+        my_choices = []
+        for i, tar in enumerate(tariffe):
+            my_choices.append((str(i + 1), tar.tariffa))
+
+        form.tariffa.choices = my_choices
+        return render_template('login/registration.html', form=form)
 
 
 @auth.route('/logout')
@@ -145,37 +165,81 @@ def pwd_recovery():
     else:
         return render_template('login/pwd_recovery.html', form=PwdRecoveryForm())
 
+@auth.route('/tariffe')
+def tariffe():
+    tariffe = Tariffa.query().fetch()
+    if len(tariffe) > 0:
+        return render_template('login/tariffe.html', len=len(tariffe),
+                               nomi_tariffe=[tar.tariffa for tar in tariffe],
+                               descr_tariffe=[tar.description for tar in tariffe])
+    else:
+        return render_template('login/tariffe.html', len=1,
+                               nomi_tariffe=["Non ci sono tariffe."],
+                               descr_tariffe=["Tutti gratis, paliazzu!!"])
+
+##############################
+#    ENDPOINTS PROVVISORI    #
+##############################
 
 
+@auth.route('/del_user', methods=['GET'])
+def del_user():
+    if request.method == 'GET':
+        user = request.args.get('user').split("_")
+        name = user[0]
+        surname = user[1]
+        msg_del = DA.delete_user(name, surname)
+        flash(msg_del)
+        return redirect(url_for('auth.login'))
 
-@auth.route('/make_users')
-def make_users():
-    u = User()
-    u.uuid = str(uuid.uuid4())
-    u.nome = "Claudio"
-    u.cognome = "Marche"
-    u.password = hashlib.sha1("12345").hexdigest()
-    u.email = "calamar@email.com"
-    u.has_superuser = True
-    u.is_valid = True
-    u.put()
-    u2 = User()
-    u2.uuid = str(uuid.uuid4())
-    u2.nome = "Raimondo"
-    u2.cognome = "Cossu"
-    u2.password = hashlib.sha1("54321").hexdigest()
-    u2.email = "rai.cossu@gmail.com"
-    u2.has_superuser = True
-    u2.is_valid = True
-    u2.put()
-    u2 = User()
-    u2.uuid = str(uuid.uuid4())
-    u2.nome = "Marco"
-    u2.cognome = "Uras"
-    u2.password = hashlib.sha1("1234567890").hexdigest()
-    u2.email = "marcou@email.com"
-    u2.has_superuser = True
-    u2.is_valid = True
-    u2.put()
-    return 'ok'
 
+@auth.route('/auth_user', methods=['GET'])
+def auth_user():
+    if request.method == 'GET':
+        user = request.args.get('user').split("_")
+        name = user[0]
+        surname = user[1]
+        msg_del = DA.auth_user(name, surname)
+        flash(msg_del)
+        return redirect(url_for('auth.login'))
+
+
+@auth.route('/admin_user', methods=['GET'])
+def admin_user():
+    if request.method == 'GET':
+        user = request.args.get('user').split("_")
+        name = user[0]
+        surname = user[1]
+        msg_del = DA.admin_user(name, surname)
+        flash(msg_del)
+        return redirect(url_for('auth.login'))
+
+@auth.route('/add_admin', methods=['GET'])
+def add_admin():
+    if request.method == 'GET':
+        usr = User()
+        usr.nome = "Claudio"
+        usr.cognome = "Marche"
+        usr.uuid = str(uuid.uuid4())
+        usr.password = hashlib.sha1("ciaone").hexdigest()
+        usr.email = "cla.mar92@gmail.com"
+        usr.is_valid = True
+        usr.has_superuser = True
+        usr.put()
+        flash("Aggiunto amministratore")
+        return redirect(url_for('auth.login'))
+
+@auth.route('/add_user', methods=['GET'])
+def add_user():
+    if request.method == 'GET':
+        usr = User()
+        usr.nome = "Luca"
+        usr.cognome = "Puggioninu"
+        usr.uuid = str(uuid.uuid4())
+        usr.password = hashlib.sha1("ciaone").hexdigest()
+        usr.email = "l.puggioninu@gmail.com"
+        usr.targa = "GF6543"
+        usr.tariffa = "Tariffa 1"
+        usr.is_valid = True
+        usr.put()
+        return redirect(url_for('auth.login'))
