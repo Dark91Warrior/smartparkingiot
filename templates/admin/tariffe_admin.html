@@ -14,11 +14,9 @@
 
     <!-- Bootstrap core -->
     <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='scripts/jquery-3.3.1.js') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='scripts/popper.js') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='scripts/bootstrap.js') }}" rel="stylesheet">
+    <script type="text/javascript" src="{{ url_for("static", filename="scripts/jquery-3.3.1.js") }}"></script>
+    <script type="text/javascript" src="{{ url_for("static", filename="scripts/bootstrap.js") }}"></script>
 
-</head>
 
 <body>
 <div class="container">
@@ -43,7 +41,7 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Modifica Targa</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Aggiungi Tariffa</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -51,34 +49,43 @@
                     <div class="modal-body">
                         <div class="row" style="margin-top: 0%">
                             <div class="col-12" style=" text-align: left">
-                                <a class="text-dark" style="font-size: large">Inserisci la tua nuova tariffa: </a>
+                                <a class="text-dark" style="font-size: large">Inserisci la tua nuova tariffa</a>
                             </div>
                         </div>
-                        <form method="POST" action="{{ url_for("admin.add_tariffa") }}">
+                        <form method="POST" role="form" action="{{ url_for("admin.add_tariffa") }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <div class="row" style="margin-top: 0%">
-                                <div class="col-12" style=" text-align: left">
+                            <div class="row" style="margin-top: 2%">
+                                <div class="col-12" style="text-align: left">
                                     <table class="table">
                                         <tbody>
                                         <tr>
                                             <th scope="row">
                                                 <div class="form-group">
-                                                <label for="exampleFormControlInput1">Nome</label>
-                                                <input type="text" class="form-control"
-                                                       placeholder="Tariffa 1">
-                                                    </div>
+                                                    {{ form.nome(class="form-control", placeholder='Nome', pattern=".{2,}") }}
+                                                </div>
                                             </th>
                                         </tr>
                                         <tr>
                                             <th scope="row">
-                                            <div class="form-group">
-                                            <label for="exampleFormControlInput1">Descrizione</label>
-                                            <input type="text" class="form-control">
+                                                <div class="form-group">
+                                                    {{ form.descrizione(class="form-control", placeholder='Descrizione', pattern=".{2,}", cols='5') }}
+                                                </div>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">
+                                                <div class="form-group">
+                                                    {{ form.prezzo(class="form-control", placeholder='Prezzo €/h [es. 2.34]', pattern="[0-5].[0-9]{2}", cols='5') }}
                                                 </div>
                                             </th>
                                         </tr>
                                         </tbody>
                                     </table>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary" style="background-color: #4D4D4F; border-color: #4D4D4F;
+                            "><b style="font-size: large">Aggiungi</b>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -98,20 +105,41 @@
             </div>
         </div>
 
+        <form method="post" action="{{ url_for("admin.del_tariffa") }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
         {% for _ in range(0, len) %}
             <div class="row">
-                <div class="col-12">
+                <div class="col-6">
                     <b class="text-left" style="margin-top: -5%; font-size: x-large">{{ nomi_tariffe[loop.index0] }}</b>
                 </div>
+
+                {% if not empty %}
+                <div class="col-6" align="right">
+                        <button type="submit" class="btn btn-danger" name="command" value="{{ nomi_tariffe[loop.index0] }}"
+                                        ><b style="font-size: medium">Delete</b>
+                        </button>
+                </div>
+                {% endif %}
             </div>
             <div class="row">
                 <div class="col-12">
                     <a class="text-left" style="font-size: large">{{ descr_tariffe[loop.index0] }}</a>
                 </div>
             </div>
+            {% if prezzo_tariffe is defined %}
+            <div class="row">
+                <div class="col-12">
+                    <a class="text-left" style="font-size: large">Prezzo: {{ prezzo_tariffe[loop.index0] }} €/h</a>
+                </div>
+            </div>
+            {% endif %}
         {% endfor %}
 
-        <div class="row" style="margin-top: 3%; margin-bottom: 3%">
+        </form>
+
+
+        <div class="row" style="margin-top: 7%; margin-bottom: 3%">
             <div class="col-2"></div>
             <div class="col-8 text-center">
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalTariffa"

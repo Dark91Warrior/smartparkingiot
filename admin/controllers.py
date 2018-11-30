@@ -1,9 +1,10 @@
 from common.commons import get_username
 from flask import *
-from main.forms import AddPlate
 from models.User_Model import User
 from models.Tariffe_Model import Tariffa
 from data_access import DataAccess as DA
+from forms import FormTariffa
+import time
 
 admin = Blueprint('admin', __name__)
 
@@ -30,51 +31,82 @@ def index():
         return render_template('base.html', username=get_username(session), is_admin=session['user']['superuser'])
     elif request.method == 'POST':
         command = request.form['command']
-        if command == "PARKING":
-            return render_template('parking.html', username=get_username(session), is_admin=session['user']['superuser'])
-        elif command == "PAGA":
-            return render_template('paga.html', username=get_username(session), is_admin=session['user']['superuser'])
+        if command == "GESTISCI":
+            return redirect(url_for('admin.gestisci'))
         elif command == "TARIFFE":
-            tariffe = Tariffa.query().fetch()
-            if len(tariffe) > 0:
-                return render_template('tariffe_admin.html', len=len(tariffe),
-                                       nomi_tariffe=[tar.tariffa for tar in tariffe],
-                                       descr_tariffe=[tar.description for tar in tariffe])
-            else:
-                return render_template('tariffe_admin.html', len=1,
-                                       nomi_tariffe=["Non ci sono tariffe."],
-                                       descr_tariffe=["Tutti gratis, paliazzu!!"])
+            return redirect(url_for('admin.tariffe'))
         if command == "PROFILO":
-            form = AddPlate(request.form)
-            user = User().query(User.email == session['user']['email']).fetch(1)[0]
-            targhe = user.targa.split(",")
-            return render_template('profilo.html', username=get_username(session), is_admin=session['user']['superuser'], form=form, tariffa='Tariffa '+str(user.tariffa), targhe=targhe)
+            return redirect(url_for('admin.profilo'))
+
+@admin.route('/profilo', methods=['GET'])
+def profilo():
+    return 0
+
+@admin.route('/gestisci', methods=['GET'])
+def gestisci():
+    return 0
+
+@admin.route('/tariffe', methods=['GET'])
+def tariffe():
+    # form
+    form = FormTariffa()
+
+    tariffe = Tariffa.query().fetch()
+    if len(tariffe) > 0:
+        return render_template('admin/tariffe_admin.html', len=len(tariffe),
+                               nomi_tariffe=[tar.tariffa for tar in tariffe],
+                               descr_tariffe=[tar.description for tar in tariffe],
+                               prezzo_tariffe=[tar.prezzo for tar in tariffe],
+                               form=form,
+                               empty=False)
+    else:
+        return render_template('admin/tariffe_admin.html', len=1,
+                               nomi_tariffe=["Non ci sono tariffe."],
+                               descr_tariffe=["Tutti gratis, paliazzu!!"],
+                               form=form,
+                               empty=True)
 
 
 @admin.route('/add_tariffa', methods=['POST'])
 def add_tariffa():
     if request.method == 'POST':
 
-        body = json.loads(request.data)
-
-        tariffa = body["tariffa"]
-        description = body["description"]
+        tariffa = request.form['nome']
+        description = request.form['descrizione']
+        prezzo = float(request.form['prezzo'])
 
         # try to query last
-        tar = Tariffa.query().order(-Tariffa.order).fetch()
-        if len(tar) < 1:
+        tariffe = Tariffa.query().order(-Tariffa.order).fetch()
+        if len(tariffe) < 1:
             order = 1
         else:
-            order = tar[0].order + 1
+            order = tariffe[0].order + 1
 
         # import tariffa
-        tar = Tariffa()
-        tar.tariffa = tariffa
-        tar.order = order
-        tar.description = description
-        tar.put()
-        flash("Tariffa aggiunta!")
-        return redirect(url_for('auth.login'))
+        new_tar = Tariffa()
+        new_tar.tariffa = tariffa
+        new_tar.order = order
+        new_tar.description = description
+        new_tar.prezzo = prezzo
+        new_tar.put()
+
+        time.sleep(1)
+
+        return redirect(url_for('admin.tariffe'))
+
+
+
+@admin.route('/del_tariffa', methods=['POST'])
+def del_tariffa():
+    if request.method == 'POST':
+
+        tariffa = request.form['command']
+
+        Tariffa.query(Tariffa.tariffa == tariffa).fetch(1)[0].key.delete()
+
+        time.sleep(1)
+
+        return redirect(url_for('admin.tariffe'))
 
 
 #---------- users -----------#

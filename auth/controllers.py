@@ -127,7 +127,7 @@ def register():
                 return redirect(url_for('auth.login'))
             else:
                 flash('Registration error!')
-                return redirect(url_for('auth.registration'))
+                return redirect(url_for('auth.register'))
     else:
         form = UserRegistrationForm()
 
@@ -137,7 +137,17 @@ def register():
             my_choices.append((str(i + 1), tar.tariffa))
 
         form.tariffa.choices = my_choices
-        return render_template('login/registration.html', form=form)
+
+        tariffe = Tariffa.query().fetch()
+        if len(tariffe) > 0:
+            return render_template('login/registration.html', form=form, len=len(tariffe),
+                                   nomi_tariffe=[tar.tariffa for tar in tariffe],
+                                   prezzo_tariffe=[tar.prezzo for tar in tariffe],
+                                   descr_tariffe=[tar.description for tar in tariffe])
+        else:
+            return render_template('login/registration.html', form=form, len=1,
+                                   nomi_tariffe=["Non ci sono tariffe."],
+                                   descr_tariffe=["Tutti gratis, paliazzu!!"])
 
 
 @auth.route('/logout')
@@ -165,17 +175,6 @@ def pwd_recovery():
     else:
         return render_template('login/pwd_recovery.html', form=PwdRecoveryForm())
 
-@auth.route('/tariffe')
-def tariffe():
-    tariffe = Tariffa.query().fetch()
-    if len(tariffe) > 0:
-        return render_template('login/tariffe.html', len=len(tariffe),
-                               nomi_tariffe=[tar.tariffa for tar in tariffe],
-                               descr_tariffe=[tar.description for tar in tariffe])
-    else:
-        return render_template('login/tariffe.html', len=1,
-                               nomi_tariffe=["Non ci sono tariffe."],
-                               descr_tariffe=["Tutti gratis, paliazzu!!"])
 
 ##############################
 #    ENDPOINTS PROVVISORI    #

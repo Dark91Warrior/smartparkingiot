@@ -1,4 +1,6 @@
 from flask import *
+from models.Parking_Model import Parking
+
 
 arduino = Blueprint('arduino', __name__)
 
@@ -9,8 +11,13 @@ def index():
 
 @arduino.route('/addParking', methods=['POST'])
 def addParking():
-    #TODO Creare Handler per aggiungere i parcheggi dei piani
-    return 0
+    piano = request.args.get('level')
+    for i in range(1,41):
+        parking = Parking()
+        parking.piano = piano
+        parking.number = i
+        parking.put()
+    return "Parcheggi piano " + str(piano) + " inseriti."
 
 
 @arduino.route('/setParking', methods=['POST'])

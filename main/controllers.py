@@ -2,6 +2,7 @@ from common.commons import get_username
 from flask import *
 from main.forms import AddPlate
 from models.User_Model import User
+from models.Tariffe_Model import Tariffa
 from data_access import DataAccess as DA
 
 
@@ -25,51 +26,74 @@ def index():
     elif request.method == 'POST':
         command = request.form['command']
         if command == "PARKING":
-            return render_template('parking.html', username=get_username(session), is_admin=session['user']['superuser'])
+            return redirect(url_for('main.parking'))
         elif command == "PAGA":
-            return render_template('paga.html', username=get_username(session), is_admin=session['user']['superuser'])
+            return redirect(url_for('main.paga'))
         if command == "PROFILO":
-            form = AddPlate(request.form)
-            user = User().query(User.email == session['user']['email']).fetch(1)[0]
-            targhe = user.targa.split(",")
-            return render_template('profilo.html', username=get_username(session), is_admin=session['user']['superuser'], form=form, tariffa='Tariffa '+str(user.tariffa), targhe=targhe)
+            return redirect(url_for('main.profilo'))
 
 
 # gestione profilo
-@main.route('/profilo', methods=['POST'])
+@main.route('/profilo', methods=['GET','POST'])
 def profilo():
-    command = request.form['command'].split('_')
-    if command[0] == "delete":
-        targa = command[1]
-        user = User().query(User.email == session['user']['email']).fetch(1)[0]
-        targhe = user.targa.split(',')
-        targhe.remove(targa)
-        user.targa = ','.join(targhe)
-        user.put()
-        # form
+    if request.method == 'GET':
         form = AddPlate(request.form)
-        return render_template('profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
-                               form=form, tariffa='Tariffa ' + str(user.tariffa), targhe=targhe)
-    elif command[0] == "add":
-        targa = request.form['targa']
         user = User().query(User.email == session['user']['email']).fetch(1)[0]
-
-        # check if exist
+        tariffa = None
+        tariffe = Tariffa.query().fetch()
+        for i, tar in enumerate(tariffe):
+            if (i + 1) == int(user.tariffa):
+                tariffa = tar.tariffa
         targhe = user.targa.split(",")
-        if targa == "":
-            flash("Targa non valida!")
-        else:
-            if targa not in targhe:
-                user.targa = user.targa + ',' + targa
-                targhe = user.targa.split(",")
-                user.put()
-            else:
-                flash("Targa precedentemente inserita!")
+        return render_template('user/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
+                               form=form, tariffa=tariffa, descr_tariffa=tar.description, prezzo_tariffa=tar.prezzo,
+                               targhe=targhe)
+    elif request.method == 'POST':
+        command = request.form['command'].split('_')
+        if command[0] == "delete":
+            targa = command[1]
+            user = User().query(User.email == session['user']['email']).fetch(1)[0]
+            targhe = user.targa.split(',')
+            targhe.remove(targa)
+            user.targa = ','.join(targhe)
+            user.put()
+            # form
+            form = AddPlate(request.form)
+            return render_template('user/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
+                                   form=form, tariffa='Tariffa ' + str(user.tariffa), targhe=targhe)
+        elif command[0] == "add":
+            targa = request.form['targa']
+            user = User().query(User.email == session['user']['email']).fetch(1)[0]
 
-        # form
-        form = AddPlate(request.form)
-        return render_template('profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
-                               form=form, tariffa='Tariffa ' + str(user.tariffa), targhe=targhe)
+            # check if exist
+            targhe = user.targa.split(",")
+            if targa == "":
+                flash("Targa non valida!")
+            else:
+                if targa not in targhe:
+                    user.targa = user.targa + ',' + targa
+                    targhe = user.targa.split(",")
+                    user.put()
+                else:
+                    flash("Targa precedentemente inserita!")
+
+            # form
+            form = AddPlate(request.form)
+            return render_template('user/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
+                                   form=form, tariffa='Tariffa ' + str(user.tariffa), targhe=targhe)
+
+
+@main.route('/contattaci', methods=['GET'])
+def contattaci():
+    return render_template('user/contattaci.html')
+
+@main.route('/parking', methods=['GET'])
+def parking():
+    return 0
+
+@main.route('/paga', methods=['GET'])
+def paga():
+    return 0
 
 # cancellazione utente
 @main.route('/del_user', methods=['GET'])
@@ -93,7 +117,7 @@ def mod_targa():
     form = AddPlate(request.form)
     user = User().query(User.email == session['user']['email']).fetch(1)[0]
     targhe = user.targa.split(",")
-    return render_template('profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
+    return render_template('user/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
                            form=form, tariffa='Tariffa ' + str(user.tariffa), targhe=targhe)
 
 

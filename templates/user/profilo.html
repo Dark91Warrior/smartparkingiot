@@ -81,6 +81,36 @@
             </div>
         </div>
 
+        <!-- Modal -->
+        <div class="modal fade" id="ModificaTariffe" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Modifica Tariffa</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Per modificare la tua tariffa,
+                        ti chiediamo di inviare la tariffa scelta e
+                        una copia del tuo
+                        documento d'identità
+                        all'indirizzo:
+                        <br><br>
+
+                        <b>smartparking@gmail.com</b>
+                        <br><br>
+
+                        Sarai eventualmente ricontattato in base all'avvenuta modifica.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <form method="POST" action="{{ url_for("main.profilo") }}">
 
@@ -119,8 +149,15 @@
                     <a class="text-dark" style="font-size: large"><b>{{ tariffa }}</b></a>
                 </div>
                 <div class="col-6" style=" text-align: right">
-                    <a class="text-success" href="{{ url_for('auth.logout') }}" style="font-size: large"><u>Richiedi
-                        Modifica</u></a>
+                    <button type="button" class="text-success" data-toggle="modal" data-target="#ModificaTariffe"
+                            style="font-size: large; background-color: #ffffff; border: none"><u>Richiedi
+                        Modifica</u></button>
+                </div>
+                <div class="col-12" style="text-align: left">
+                    <a class="text-dark" style="font-size: large">{{ descr_tariffa }}</a>
+                </div>
+                <div class="col-12" style="text-align: left">
+                    <a class="text-dark" style="font-size: large">Prezzo: {{ prezzo_tariffa }} €/h</a>
                 </div>
             </div>
 
@@ -193,7 +230,7 @@
         <div class="row" style="margin-top: 3%; margin-bottom: 3%">
             <div class="col-2"></div>
             <div class="col-8 text-center">
-                <form method="GET" action="{{ url_for('main.index') }}">
+                <form method="GET" action="{{ url_for('main.contattaci') }}">
                     <button type="submit" class="btn btn-primary"
                             style="background-color: #4D4D4F; border-color: #4D4D4F;
                             "><b style="font-size: large">Contattaci</b>

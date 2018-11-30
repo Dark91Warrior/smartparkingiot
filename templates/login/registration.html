@@ -14,9 +14,8 @@
 
     <!-- Bootstrap core -->
     <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='scripts/jquery-3.3.1.js') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='scripts/popper.js') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='scripts/bootstrap.js') }}" rel="stylesheet">
+    <script type="text/javascript" src="{{ url_for("static", filename="scripts/jquery-3.3.1.js") }}"></script>
+    <script type="text/javascript" src="{{ url_for("static", filename="scripts/bootstrap.js") }}"></script>
 
 </head>
 
@@ -34,6 +33,48 @@
     </div>
 
     <div class="my-5">
+
+        <!-- Modal -->
+        <div class="modal fade" id="Tariffe" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Tariffe</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {% for _ in range(0, len) %}
+                            <div class="row">
+                                <div class="col-6">
+                                    <b class="text-left"
+                                       style="margin-top: -5%; font-size: x-large">{{ nomi_tariffe[loop.index0] }}</b>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <a class="text-left" style="font-size: large">{{ descr_tariffe[loop.index0] }}</a>
+                                </div>
+                            </div>
+                            {% if prezzo_tariffe is defined %}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <a class="text-left"
+                                           style="font-size: large">Prezzo: {{ prezzo_tariffe[loop.index0] }} €</a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <form class="form-horizontal" role="form" method="POST" action="{{ url_for("auth.register") }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             {% with messages = get_flashed_messages() %}
@@ -122,7 +163,7 @@
                     <div class="form-group">
                         <div class="input-group mb-2 mr-sm-2 mb-sm-0">
                             <div class="input-group-addon" style="width: 2.6rem"><i class="fa fa-money"></i></div>
-                            {{ form.tariffa(class="form-control", placeholder="Tariffa", pattern=".{5,}", title="Tariffa 1", required=True) }}
+                            {{ form.tariffa(class="form-control", placeholder="Tariffa", pattern=".{5,}", title="Tariffa", required=True) }}
                         </div>
                     </div>
                 </div>
@@ -162,12 +203,13 @@
                     </button>
                 </form>
             </div>
+        </div>
 
-            <div class="row" style="margin-top: 5%">
-                <div class="col-9" style="text-align: right">
-                    <a class="text-success" href="{{ url_for('auth.tariffe') }}"
-                       style="font-size: large"><u>Tariffe</u></a>
-                </div>
+
+        <div class="row" style="margin-top: 5%">
+            <div class="col-12" style="text-align: right">
+                <button class="text-success" type="button" data-toggle="modal" data-target="#Tariffe"
+                        style="font-size: large; background-color: #ffffff; border: none"><u>Vedi Tariffe</u></button>
             </div>
         </div>
     </div>

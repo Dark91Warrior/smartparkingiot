@@ -8,7 +8,10 @@ from arduinoHandler.controllers import arduino
 
 app = Flask(__name__)
 
-CSRFProtect(app)
+csrf = CSRFProtect(app)
+csrf.exempt("arduinoHandler.controllers.addParking")
+csrf.exempt("arduinoHandler.controllers.setParking")
+
 
 #app.secret_key = "%xMb^6m%z?Fup3wC(T{9MrhH'|G(ZS"
 app.secret_key = "sezdrtfyuijko"
