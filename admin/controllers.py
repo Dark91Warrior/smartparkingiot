@@ -95,7 +95,7 @@ def add_tariffa():
         return redirect(url_for('admin.tariffe'))
 
 
-
+#TODO rendere solo la tariffa non visibile
 @admin.route('/del_tariffa', methods=['POST'])
 def del_tariffa():
     if request.method == 'POST':
