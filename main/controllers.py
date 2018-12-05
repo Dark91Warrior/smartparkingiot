@@ -197,13 +197,18 @@ def prenota():
         violazione = request.args.get('violazione')
         parcheggio = request.args.get('parcheggio')
 
+        if violazione == "option1":
+            text = "Parcheggio gia' occupato"
+        elif violazione == "option1":
+            text = "Parcheggio non funzionante"
+
         if violazione == "option3":
             return redirect(url_for('main.violazione', parcheggio=parcheggio))
         else:
             object = "[VIOLAZIONE COMUNE]"
             text = "L'utente " + get_username(session) + ", nel parcheggio " + parcheggio + \
                    ", ha riscontrato una violazione del tipo: " + \
-                   violazione + "." + "\nRispondi all'email: " + session['user']['email']
+                   text + "." + "\nRispondi all'email: " + session['user']['email']
 
             if send_email(object, text):
                 flash('Violazione segnalata correttamente')
@@ -271,7 +276,6 @@ def violazione():
         else:
             flash("Errore nella segnalazione. Ti preghiamo di riprovare piu' tardi")
 
-        flash('Violazione segnalata correttamente')
         return redirect(url_for('main.index'))
 
 
