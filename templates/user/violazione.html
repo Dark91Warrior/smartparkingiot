@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Smart Parking</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Bootstrap core -->
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/jquery-3.3.1.js') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/popper.js') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/bootstrap.js') }}" rel="stylesheet">
+
+</head>
+
+<body>
+<div class="container">
+
+    <div class="row" style="background-color: #4D4D4F; text-align: center">
+
+        <div class="col-lg-12">
+            <h2 style="color: #FFFFFF"></h2>
+            <h2 style="color: #FFFFFF">Violazione</h2>
+            <h2 style="color: #FFFFFF"></h2>
+
+        </div>
+    </div>
+
+
+    <div class="my-5">
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6" style="text-align: center">
+                <div>
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" class="img-fluid" alt="parking"
+                         height="50%" width="50%"></div>
+                <hr>
+            </div>
+        </div>
+        <form method="POST" action="{{ url_for('main.violazione') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div class="row">
+                <div class="col-12" style=" text-align: left">
+                    <a class="text-dark" style="font-size: large"><b><h2>Parcheggio {{ parcheggio }}</h2></b></a>
+
+                    <input type="hidden" name="parcheggio" value="{{ parcheggio }}"><br>
+
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 4%">
+                <div class="col-12" style=" text-align: left">
+                    <a class="text-dark" style="font-size: x-large">Descrivici il problema:</a>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 7%">
+                <div class="col-12" style=" text-align: left">
+                    {{ form.violazione(class="form-control", placeholder='Es. Manca la segnalazione del parcheggio.', pattern=".{2,}", rows='5') }}
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 7%">
+                <div class="col-2"></div>
+                <div class="col-8 text-center">
+
+                    <button type="submit" class="btn btn-primary"
+                            style="background-color: #4D4D4F; border-color: #4D4D4F;
+                            "><b style="font-size: large">Invia</b>
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="row" style="margin-top: 3%; margin-bottom: 3%">
+            <div class="col-2"></div>
+            <div class="col-8 text-center">
+                <form method="POST" action="{{ url_for('main.parking') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="parking" value="{{ parcheggio }}"/>
+                    <button type="submit" class="btn btn-primary"
+                            style="background-color: #4D4D4F; border-color: #4D4D4F;
+                            "><b style="font-size: large">Back</b>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+</body>
+</html>

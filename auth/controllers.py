@@ -8,7 +8,8 @@ from models.User_Model import User
 from models.Log_Model import Log
 from models.Tariffe_Model import Tariffa
 from data_access import DataAccess as DA
-import json
+from models.Parking_Model import Parking
+from random import randint
 
 auth = Blueprint('auth', __name__)
 
@@ -242,3 +243,39 @@ def add_user():
         usr.is_valid = True
         usr.put()
         return redirect(url_for('auth.login'))
+
+
+@auth.route('/add_data', methods=['GET'])
+def add_data():
+    if request.method == 'GET':
+        #utente
+        usr = User()
+        usr.nome = "Luca"
+        usr.cognome = "Puggioninu"
+        usr.uuid = str(uuid.uuid4())
+        usr.password = hashlib.sha1("ciaone").hexdigest()
+        usr.email = "l.puggioninu@gmail.com"
+        usr.targa = "GF6543"
+        usr.tariffa = "Tariffa 1"
+        usr.is_valid = True
+        usr.put()
+
+        #tariffa
+        tar = Tariffa()
+        tar.tariffa = 'Tariffa 1'
+        tar.description = "La piu' bella gazz"
+        tar.prezzo = 5.00
+        tar.put()
+
+        #parcheggi
+        state = ['Libero', 'Prenotato', 'Occupato', 'Fuori Servizio']
+        for piano in ['A', 'B', 'C', 'D']:
+            for i in range(1, 41):
+                parking = Parking()
+                parking.piano = piano
+                parking.number = i
+                parking.stato = state[randint(0,3)]
+                parking.put()
+        flash("Dati Aggiunti")
+        return redirect(url_for('auth.login'))
+
