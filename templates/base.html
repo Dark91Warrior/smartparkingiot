@@ -24,12 +24,12 @@
 <div class="my-5">
     <form method="POST"
 
-          {% if is_admin %}
-            action="{{ url_for("admin.index") }}"
-          {% else %}
-            action="{{ url_for("main.index") }}"
-          {% endif %}
-            >
+            {% if is_admin %}
+          action="{{ url_for("admin.index") }}"
+            {% else %}
+          action="{{ url_for("main.index") }}"
+            {% endif %}
+    >
 
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="row">
@@ -54,6 +54,13 @@
             {% endif %}
         {% endwith %}
 
+        {% if is_admin %}
+            <div class="row">
+                <div class="col-12" style="margin-bottom: 5%; text-align: center">
+                    <a class="text-danger" style="font-size: x-large"><b>Account Amministratore</b></a>
+                </div>
+            </div>
+        {% endif %}
 
         <div class="row">
             <div class="col-12" style="margin-bottom: 5%; text-align: center">
@@ -71,7 +78,7 @@
                         <b style="font-size: large">Gestisci</b>
                     {% else %}
                         <b style="font-size: large">Prenota</b>
-                    {%  endif %}
+                    {% endif %}
                 </button>
             </div>
         </div>

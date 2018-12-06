@@ -2,9 +2,11 @@ from common.commons import get_username
 from flask import *
 from models.User_Model import User
 from models.Tariffe_Model import Tariffa
+from models.Parking_Model import Parking
 from data_access import DataAccess as DA
-from forms import FormTariffa
+from forms import FormTariffa, ModPw, AddPlate
 import time
+import hashlib
 
 admin = Blueprint('admin', __name__)
 
@@ -21,30 +23,131 @@ def before_request():
         return redirect(url_for('auth.login'))
 
 
-#---------- items -----------#
+# ---------- items -----------#
 
 # gestione menu
 @admin.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        flash("Utente Amministratore")
         return render_template('base.html', username=get_username(session), is_admin=session['user']['superuser'])
     elif request.method == 'POST':
         command = request.form['command']
-        if command == "GESTISCI":
-            return redirect(url_for('admin.gestisci'))
+        if command == "PARKING":
+            return redirect(url_for('admin.gestisci', level='A'))
         elif command == "TARIFFE":
             return redirect(url_for('admin.tariffe'))
         if command == "PROFILO":
             return redirect(url_for('admin.profilo'))
 
+
 @admin.route('/profilo', methods=['GET'])
 def profilo():
-    return 0
+    if request.method == 'GET':
+        form = AddPlate(request.form)
+        user = User().query(User.uuid == session['user']['user_id']).fetch(1)[0]
+        targhe = user.targa.split(",")
 
-@admin.route('/gestisci', methods=['GET'])
+        return render_template('admin/profilo.html', username=get_username(session), form=form, targhe=targhe)
+
+    elif request.method == 'POST':
+        command = request.form['command'].split('_')
+        if command[0] == "delete":
+            targa = command[1]
+            user = User().query(User.email == session['user']['email']).fetch(1)[0]
+            targhe = user.targa.split(',')
+            targhe.remove(targa)
+            user.targa = ','.join(targhe)
+            user.put()
+            # form
+            form = AddPlate(request.form)
+            return render_template('admin/profilo.html', username=get_username(session),
+                                   form=form, targhe=targhe)
+        elif command[0] == "add":
+            targa = request.form['targa']
+            user = User().query(User.email == session['user']['email']).fetch(1)[0]
+
+            # check if exist
+            targhe = user.targa.split(",")
+            if targa == "":
+                flash("Targa non valida!")
+            else:
+                if targa not in targhe:
+                    user.targa = user.targa + ',' + targa
+                    targhe = user.targa.split(",")
+                    user.put()
+                else:
+                    flash("Targa precedentemente inserita!")
+
+            # form
+            form = AddPlate(request.form)
+
+        return render_template('admin/profilo.html', username=get_username(session),
+                                   form=form, targhe=targhe)
+
+
+@admin.route('/gestisci', methods=['GET', 'POST'])
 def gestisci():
-    return 0
+    if request.method == 'GET':
+        piano = request.args.get('level')
+
+        parks = Parking().query(Parking.piano == piano).fetch()
+
+        try:
+            list_for_view = [(str(park.number), "btn btn-danger" if park.stato == 'Occupato'
+            else "btn btn-success" if park.stato == 'Libero'
+            else "btn btn-warning" if park.stato == 'Prenotato'
+            else "btn btn-dark" if park.stato == 'Fuori Servizio'
+            else "btn btn-primary") for park in parks]
+            return render_template('admin/gestisci.html', level=piano, parking=list_for_view)
+        except:
+            flash('Errore nel caricamento dei parcheggi')
+            redirect(url_for('admin.index'))
+
+    elif request.method == 'POST':
+        # gestione pagina relativa al singolo parcheggio
+        parking = request.form['parking']
+
+        piano = parking[0]
+        numero = int(parking[1:])
+
+        park = Parking().query(Parking.piano == piano, Parking.number == numero).fetch(1)
+
+        # se esiste il parcheggio
+        if len(park) > 0:
+            stato = park[0].stato
+
+            return render_template('admin/parking.html', parking=parking, stato=stato, livello=piano)
+
+        else:
+            flash("Errore caricamento parcheggio")
+            return redirect(url_for('admin.index'))
+
+
+@admin.route('/parking', methods=['POST'])
+def parking():
+    command = request.form['command']
+    parking = request.form['parcheggio']
+
+    piano = parking[0]
+    numero = int(parking[1:])
+
+    try:
+
+        park = Parking().query(Parking.piano == piano, Parking.number == numero).fetch(1)
+
+        if command == 'libera':
+            park[0].stato = 'Libero'
+        elif command == 'occupa':
+            park[0].stato = 'Occupato'
+
+        stato = park[0].stato
+        park[0].put()
+
+        return render_template('admin/parking.html', parking=parking, stato=stato, livello=piano)
+    except:
+        flash("Errore modifica parcheggio")
+        return redirect(url_for('admin.index'))
+
 
 @admin.route('/tariffe', methods=['GET'])
 def tariffe():
@@ -57,6 +160,7 @@ def tariffe():
                                nomi_tariffe=[tar.tariffa for tar in tariffe],
                                descr_tariffe=[tar.description for tar in tariffe],
                                prezzo_tariffe=[tar.prezzo for tar in tariffe],
+                               visibilita=[True if tar.visibilita is True else False for tar in tariffe],
                                form=form,
                                empty=False)
     else:
@@ -95,29 +199,63 @@ def add_tariffa():
         return redirect(url_for('admin.tariffe'))
 
 
-#TODO rendere solo la tariffa non visibile
-@admin.route('/del_tariffa', methods=['POST'])
-def del_tariffa():
+@admin.route('/mod_tariffa', methods=['POST'])
+def mod_tariffa():
     if request.method == 'POST':
 
-        tariffa = request.form['command']
+        try:
+            tariffa = request.form['command-add']
+            comando = "aggiungi"
+        except:
+            pass
 
-        Tariffa.query(Tariffa.tariffa == tariffa).fetch(1)[0].key.delete()
+        try:
+            tariffa = request.form['command-del']
+            comando = "cancella"
+        except:
+            pass
 
+        tar = Tariffa.query(Tariffa.tariffa == tariffa).fetch(1)[0]
+        if comando == "aggiungi":
+            tar.visibilita = True
+        elif comando == "cancella":
+            tar.visibilita = False
+
+        tar.put()
         time.sleep(1)
-
         return redirect(url_for('admin.tariffe'))
 
 
-#---------- users -----------#
-
-
+# cancellazione utente
 @admin.route('/del_user', methods=['GET'])
 def del_user():
     if request.method == 'GET':
-        user = request.args.get('user').split("_")
-        name = user[0]
-        surname = user[1]
-        msg_del = DA.delete_user(name, surname)
-        flash(msg_del)
-        return redirect(url_for('auth.login'))
+        uuid = session['user']['user_id']
+        if DA.delete_user_from_uuid(uuid):
+            user = session['user']['user_id']
+            session.pop('user', None)
+            return redirect(url_for('auth.login'))
+        else:
+            flash("Errore nella cancellazione del profilo!")
+
+# modifica password
+@admin.route('/password', methods=['GET','POST'])
+def password():
+    if request.method == 'GET':
+        form = ModPw()
+        return render_template('admin/modifica_password.html', form=form, user=get_username(session))
+    elif request.method == 'POST':
+        try:
+            pw = request.form['password']
+
+            # modifica password nel database
+            user = User.query(User.uuid == session['user']['user_id']).fetch(1)[0]
+            user.password = hashlib.sha1(pw).hexdigest()
+            user.put()
+
+            # logout
+            flash("Modifica password avvenuta correttamente.")
+            return redirect(url_for('auth.logout'))
+        except:
+            flash("Erroe nella modifica. Riprova piu' tardi.")
+            return redirect(url_for('admin.index'))

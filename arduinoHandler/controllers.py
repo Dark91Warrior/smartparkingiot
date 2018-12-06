@@ -1,5 +1,7 @@
 from flask import *
 from models.Parking_Model import Parking
+import time
+import json
 
 
 arduino = Blueprint('arduino', __name__)
@@ -24,3 +26,9 @@ def addParking():
 def setParking():
     #TODO Creare Handler per settare lo stato di un parcheggio
     return 0
+
+@arduino.route('/test_attuatore', methods=['POST'])
+def test_attuatore():
+    #TODO Creare Handler per settare lo stato di un parcheggio
+    time.sleep(5)
+    return json.dumps({'controllore': 'YES', 'sensori': 'YES'})

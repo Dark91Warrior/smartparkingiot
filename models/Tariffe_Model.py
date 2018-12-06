@@ -5,3 +5,4 @@ class Tariffa(ndb.Model):
     order = ndb.IntegerProperty()
     description = ndb.StringProperty()
     prezzo = ndb.FloatProperty()
+    visibilita = ndb.BooleanProperty(default=True)

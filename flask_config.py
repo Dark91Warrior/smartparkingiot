@@ -11,6 +11,7 @@ app = Flask(__name__)
 csrf = CSRFProtect(app)
 csrf.exempt("arduinoHandler.controllers.addParking")
 csrf.exempt("arduinoHandler.controllers.setParking")
+csrf.exempt("arduinoHandler.controllers.test_attuatore")
 
 
 #app.secret_key = "%xMb^6m%z?Fup3wC(T{9MrhH'|G(ZS"

@@ -62,7 +62,7 @@ def index():
 def profilo():
     if request.method == 'GET':
         form = AddPlate(request.form)
-        user = User().query(User.email == session['user']['email']).fetch(1)[0]
+        user = User().query(User.uuid == session['user']['user_id']).fetch(1)[0]
 
         try:
             tar = Tariffa.query(Tariffa.tariffa == user.tariffa).fetch(1)[0]

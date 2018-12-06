@@ -116,7 +116,7 @@ def register():
         form = UserRegistrationForm(request.form)
 
         # per il check del form devo guardare anche le tariffe
-        tariffe = Tariffa.query().fetch()
+        tariffe = Tariffa.query(Tariffa.visibilita is True).order(Tariffa.order).fetch()
         my_choices = []
         for i, tar in enumerate(tariffe):
             my_choices.append((str(i + 1), tar.tariffa))
@@ -129,17 +129,16 @@ def register():
             else:
                 flash('Registration error!')
                 return redirect(url_for('auth.register'))
-    else:
+    elif request.method == 'GET':
         form = UserRegistrationForm()
 
-        tariffe = Tariffa.query().order(Tariffa.order).fetch()
+        tariffe = Tariffa.query(Tariffa.visibilita == True).order(Tariffa.order).fetch()
         my_choices = []
         for i, tar in enumerate(tariffe):
             my_choices.append((str(i + 1), tar.tariffa))
 
         form.tariffa.choices = my_choices
 
-        tariffe = Tariffa.query().fetch()
         if len(tariffe) > 0:
             return render_template('login/registration.html', form=form, len=len(tariffe),
                                    nomi_tariffe=[tar.tariffa for tar in tariffe],
@@ -181,18 +180,6 @@ def pwd_recovery():
 #    ENDPOINTS PROVVISORI    #
 ##############################
 
-
-@auth.route('/del_user', methods=['GET'])
-def del_user():
-    if request.method == 'GET':
-        user = request.args.get('user').split("_")
-        name = user[0]
-        surname = user[1]
-        msg_del = DA.delete_user(name, surname)
-        flash(msg_del)
-        return redirect(url_for('auth.login'))
-
-
 @auth.route('/auth_user', methods=['GET'])
 def auth_user():
     if request.method == 'GET':
@@ -229,22 +216,6 @@ def add_admin():
         flash("Aggiunto amministratore")
         return redirect(url_for('auth.login'))
 
-@auth.route('/add_user', methods=['GET'])
-def add_user():
-    if request.method == 'GET':
-        usr = User()
-        usr.nome = "Luca"
-        usr.cognome = "Puggioninu"
-        usr.uuid = str(uuid.uuid4())
-        usr.password = hashlib.sha1("ciaone").hexdigest()
-        usr.email = "l.puggioninu@gmail.com"
-        usr.targa = "GF6543"
-        usr.tariffa = "Tariffa 1"
-        usr.is_valid = True
-        usr.put()
-        return redirect(url_for('auth.login'))
-
-
 @auth.route('/add_data', methods=['GET'])
 def add_data():
     if request.method == 'GET':
@@ -260,11 +231,29 @@ def add_data():
         usr.is_valid = True
         usr.put()
 
+        usr = User()
+        usr.nome = "Claudio"
+        usr.cognome = "Marche"
+        usr.uuid = str(uuid.uuid4())
+        usr.password = hashlib.sha1("ciaone").hexdigest()
+        usr.email = "cla.mar92@gmail.com"
+        usr.is_valid = True
+        usr.has_superuser = True
+        usr.put()
+
         #tariffa
         tar = Tariffa()
         tar.tariffa = 'Tariffa 1'
         tar.description = "La piu' bella gazz"
         tar.prezzo = 5.00
+        tar.visibilita = True
+        tar.put()
+
+        tar = Tariffa()
+        tar.tariffa = 'Tariffa 2'
+        tar.description = "La meno bella gazz"
+        tar.prezzo = 5.00
+        tar.visibilita = False
         tar.put()
 
         #parcheggi

@@ -15,3 +15,8 @@ indexes:
   - name: uuid
   - name: start
     direction: desc
+
+- kind: Tariffa
+  properties:
+  - name: visibilita
+  - name: order

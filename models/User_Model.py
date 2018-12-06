@@ -10,4 +10,4 @@ class User(UserMixin, ndb.Model):
     has_superuser = ndb.BooleanProperty(default=False)
     is_valid = ndb.BooleanProperty(default=False)
     tariffa = ndb.StringProperty(default=None)
-    targa = ndb.StringProperty(default=None)
+    targa = ndb.StringProperty(default='Nessuna')

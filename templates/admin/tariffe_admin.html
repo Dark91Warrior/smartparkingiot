@@ -105,36 +105,51 @@
             </div>
         </div>
 
-        <form method="post" action="{{ url_for("admin.del_tariffa") }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <form method="post" action="{{ url_for("admin.mod_tariffa") }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        {% for _ in range(0, len) %}
-            <div class="row">
-                <div class="col-6">
-                    <b class="text-left" style="margin-top: -5%; font-size: x-large">{{ nomi_tariffe[loop.index0] }}</b>
-                </div>
+            {% for _ in range(0, len) %}
+                <div class="row" style="margin-top: 3%">
+                    <div class="col-7">
+                        <b class="text-left"
+                           style="margin-top: -5%; font-size: x-large">{{ nomi_tariffe[loop.index0] }}
+                            {% if visibilita[loop.index0] == False %}
+                                <b class="text-danger"
+                                   style="margin-top: -5%; font-size: x-large">[HIDDEN]</b>{% endif %}</b>
+                    </div>
 
-                {% if not empty %}
-                <div class="col-6" align="right">
-                        <button type="submit" class="btn btn-danger" name="command" value="{{ nomi_tariffe[loop.index0] }}"
-                                        ><b style="font-size: medium">Delete</b>
-                        </button>
+                    {% if not empty %}
+                        {% if visibilita[loop.index0] == True %}
+                            <div class="col-5" align="right">
+                                <button type="submit" class="btn btn-danger" name="command-del"
+                                        value="{{ nomi_tariffe[loop.index0] }}"
+                                ><b style="font-size: medium">Delete</b>
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="col-5" align="right">
+                                <button type="submit" class="btn btn-success" name="command-add"
+                                        value="{{ nomi_tariffe[loop.index0] }}"
+                                ><b style="font-size: medium">Show</b>
+                                </button>
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 </div>
+                <div class="row">
+                    <div class="col-7">
+                        <a class="text-left" style="font-size: large">{{ descr_tariffe[loop.index0] }}</a>
+                    </div>
+                </div>
+                {% if prezzo_tariffe is defined %}
+                    <div class="row">
+                        <div class="col-12">
+                            <a class="text-left" style="font-size: large">Prezzo: {{ prezzo_tariffe[loop.index0] }}
+                                €/h</a>
+                        </div>
+                    </div>
                 {% endif %}
-            </div>
-            <div class="row">
-                <div class="col-12">
-                    <a class="text-left" style="font-size: large">{{ descr_tariffe[loop.index0] }}</a>
-                </div>
-            </div>
-            {% if prezzo_tariffe is defined %}
-            <div class="row">
-                <div class="col-12">
-                    <a class="text-left" style="font-size: large">Prezzo: {{ prezzo_tariffe[loop.index0] }} €/h</a>
-                </div>
-            </div>
-            {% endif %}
-        {% endfor %}
+            {% endfor %}
 
         </form>
 
@@ -152,7 +167,7 @@
         <div class="row" style="margin-top: 3%; margin-bottom: 3%">
             <div class="col-2"></div>
             <div class="col-8 text-center">
-                <form method="GET" action="{{ url_for('main.index') }}">
+                <form method="GET" action="{{ url_for('admin.index') }}">
                     <button type="submit" class="btn btn-primary"
                             style="background-color: #4D4D4F; border-color: #4D4D4F;
                             "><b style="font-size: large">Back</b>
