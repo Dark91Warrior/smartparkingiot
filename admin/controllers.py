@@ -149,6 +149,24 @@ def parking():
         return redirect(url_for('admin.index'))
 
 
+@admin.route('/fuori_servizio', methods=['POST'])
+def fuori_servizio():
+    parking = request.form['fuori_servzio']
+
+    piano = parking[0]
+    numero = int(parking[1:])
+    stato = "Fuori Servizio"
+
+    try:
+        park = Parking().query(Parking.piano == piano, Parking.number == numero).fetch(1)
+        park[0].stato = stato
+        park[0].put()
+        return render_template('admin/parking.html', parking=parking, stato=stato, livello=piano)
+    except:
+        flash("Errore modifica parcheggio")
+        return redirect(url_for('admin.index'))
+
+
 @admin.route('/tariffe', methods=['GET'])
 def tariffe():
     # form
@@ -259,3 +277,16 @@ def password():
         except:
             flash("Erroe nella modifica. Riprova piu' tardi.")
             return redirect(url_for('admin.index'))
+
+# modifica targa
+@admin.route('/mod_targa', methods=['POST'])
+def mod_targa():
+    targa = request.form['targa']
+    uuid = session['user']['user_id']
+    if not DA.change_targa(uuid, targa):
+        flash("Errore in modifica targa!")
+    form = AddPlate(request.form)
+    user = User().query(User.email == session['user']['email']).fetch(1)[0]
+    targhe = user.targa.split(",")
+    return render_template('admin/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
+                           form=form, targhe=targhe)

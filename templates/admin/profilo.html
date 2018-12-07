@@ -52,7 +52,7 @@
                                 <a class="text-dark" style="font-size: large">Inserisci la tua nuova targa: </a>
                             </div>
                         </div>
-                        <form method="POST" action="{{ url_for("main.mod_targa") }}">
+                        <form method="POST" action="{{ url_for("admin.mod_targa") }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <div class="row" style="margin-top: 0%">
                                 <div class="col-12" style=" text-align: left">
@@ -150,7 +150,7 @@
             </div>
         </form>
 
-        <form method="POST" action="{{ url_for("main.profilo") }}">
+        <form method="POST" action="{{ url_for("admin.profilo") }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="row" style="margin-top: 0%">
                 <div class="col-12" style=" text-align: left">

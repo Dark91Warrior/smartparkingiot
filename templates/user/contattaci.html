@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <div class="container">
+<div class="container">
 
     <div class="row" style="background-color: #4D4D4F; text-align: center">
 
@@ -47,18 +47,53 @@
         <div class="row">
             <div class="col-md-8">
                 <br>
-                <h5 class="text-left" style="margin-top: -5%">Per qualsiasi informazione riguardo la struttura di parking o l'utilizzo dell'applicazione,
-                    rivolgiti all'indirizzo email:
-                    <br><br>
-
-                    <b>smartparking@gmail.com</b>
-                    <br><br>
-
-                    Sarai contattato al più presto. </h5>
-                <hr>
+                <h4 class="text-left" style="margin-top: -5%">Descrivici il tuo problema:</h4>
             </div>
             <div class="col-md-2"></div>
         </div>
+
+        <form method="POST" role="form" action="{{ url_for("main.contattaci") }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div class="row" style="margin-top: 3%">
+                <div class="col-12" style=" text-align: left">
+                    <a class="text-dark" style="font-size: large">Oggetto:</a>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 0%">
+                <div class="col-12" style=" text-align: left">
+                    <div class="form-group">
+                        {{ form.oggetto(class="form-control", placeholder='Oggetto', pattern=".{2,}", required=True) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 3%">
+                <div class="col-12" style=" text-align: left">
+                    <a class="text-dark" style="font-size: large">Descrizione:</a>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 0%">
+                <div class="col-12" style=" text-align: left">
+                    <div class="form-group">
+                        {{ form.descrizione(class="form-control", placeholder='Descrizione', pattern=".{2,}", rows='4', required=True) }}
+                    </div>
+                </div>
+            </div>
+
+        <div class="row" style="margin-top: 3%; margin-bottom: 3%">
+            <div class="col-2"></div>
+            <div class="col-8 text-center">
+                    <button type="submit" class="btn btn-primary"
+                            style="background-color: #4D4D4F; border-color: #4D4D4F;
+                            "><b style="font-size: large">Invia</b>
+                    </button>
+            </div>
+        </div>
+
+        </form>
 
         <div class="row" style="margin-top: 3%; margin-bottom: 3%">
             <div class="col-2"></div>
@@ -73,6 +108,6 @@
         </div>
 
     </div>
-    </div>
+</div>
 </body>
 </html>

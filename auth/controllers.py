@@ -60,7 +60,13 @@ def insert_user(form):
             u.cognome = form.cognome.data
             u.password = hashlib.sha1(form.password.data).hexdigest()
             u.email = form.email.data
-            u.tariffa = form.tariffa.data
+
+            # insert tariffa
+            tariffe = Tariffa.query(Tariffa.visibilita == True).order(Tariffa.order).fetch()
+            for i, tar in enumerate(tariffe):
+                if (i+1) == int(form.tariffa.data):
+                    u.tariffa = tar.tariffa
+
             u.targa = form.targa.data
             u.put()
             return True
@@ -116,7 +122,7 @@ def register():
         form = UserRegistrationForm(request.form)
 
         # per il check del form devo guardare anche le tariffe
-        tariffe = Tariffa.query(Tariffa.visibilita is True).order(Tariffa.order).fetch()
+        tariffe = Tariffa.query(Tariffa.visibilita == True).order(Tariffa.order).fetch()
         my_choices = []
         for i, tar in enumerate(tariffe):
             my_choices.append((str(i + 1), tar.tariffa))
@@ -124,8 +130,7 @@ def register():
 
         if form.validate():
             if insert_user(form):
-                flash('Registrazione eseguita!')
-                return redirect(url_for('auth.login'))
+                return render_template('login/not_allowed.html')
             else:
                 flash('Registration error!')
                 return redirect(url_for('auth.register'))
@@ -168,7 +173,7 @@ def pwd_recovery():
         if form.validate():
             msg = send_reset_pwd(form)
             flash(msg)
-            return redirect(url_for('auth.pwd_recovery'))
+            return redirect(url_for('auth.login'))
         else:
             flash('Impossibile completare la richiesta')
             return redirect(url_for('auth.pwd_recovery'))
@@ -246,12 +251,14 @@ def add_data():
         tar.tariffa = 'Tariffa 1'
         tar.description = "La piu' bella gazz"
         tar.prezzo = 5.00
+        tar.order = 1
         tar.visibilita = True
         tar.put()
 
         tar = Tariffa()
         tar.tariffa = 'Tariffa 2'
         tar.description = "La meno bella gazz"
+        tar.order = 2
         tar.prezzo = 5.00
         tar.visibilita = False
         tar.put()

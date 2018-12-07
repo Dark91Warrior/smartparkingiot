@@ -1,6 +1,6 @@
 from common.commons import get_username
 from flask import *
-from main.forms import AddPlate, Prenota, Violazione, ModPw
+from main.forms import AddPlate, Prenota, Violazione, ModPw, ConttataciForm
 from models.User_Model import User
 from models.Tariffe_Model import Tariffa
 from models.Parking_Model import Parking
@@ -61,7 +61,7 @@ def index():
 @main.route('/profilo', methods=['GET','POST'])
 def profilo():
     if request.method == 'GET':
-        form = AddPlate(request.form)
+        form = AddPlate()
         user = User().query(User.uuid == session['user']['user_id']).fetch(1)[0]
 
         try:
@@ -137,9 +137,21 @@ def password():
             return redirect(url_for('main.index'))
 
 
-@main.route('/contattaci', methods=['GET'])
+@main.route('/contattaci', methods=['GET','POST'])
 def contattaci():
-    return render_template('user/contattaci.html')
+    if request.method == 'GET':
+        form = ConttataciForm()
+        return render_template('user/contattaci.html', form=form)
+    elif request.method == 'POST':
+        oggetto = request.form['oggetto']
+        descrizione = request.form['descrizione']
+
+        descrizione = "L'utente " + get_username(session) + " (con id: " + session['user']['user_id'] + "), ha " \
+                      "utilizzato la sezione CONTATTACI. Di seguito la descrizione:\n" + descrizione
+        send_email(oggetto, descrizione)
+        flash("Comunicazione inviata correttamente")
+        return redirect(url_for('main.profilo'))
+
 
 
 @main.route('/parking', methods=['GET', 'POST'])
@@ -199,8 +211,8 @@ def prenota():
 
         if violazione == "option1":
             text = "Parcheggio gia' occupato"
-        elif violazione == "option1":
-            text = "Parcheggio non funzionante"
+        elif violazione == "option2":
+            text = "Il parcheggio non identifica la mia auto"
 
         if violazione == "option3":
             return redirect(url_for('main.violazione', parcheggio=parcheggio))

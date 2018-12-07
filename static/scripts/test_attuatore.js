@@ -10,6 +10,7 @@ $(document).ready(function () {
 function test(parking) {
     document.getElementById('content').style.display = 'none';
     document.getElementById('content2').style.display = 'none';
+    document.getElementById('fuori_servizio').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
     var URL = "/arduino/test_attuatore";
