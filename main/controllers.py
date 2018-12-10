@@ -7,6 +7,7 @@ from models.Parking_Model import Parking
 from data_access import DataAccess as DA
 from models.Booking_Model import Booking
 from google.appengine.api import mail
+from utils.utils import publishMQTT
 import hashlib
 
 
@@ -247,7 +248,9 @@ def prenota():
             targa = targhe[idx_targa - 1]
 
             # send signal to arduino
-            #TODO funzione per segnalare all'arduino l'occupazione
+            if not publishMQTT(parking, "prenotazione"):
+                flash("Errore nella prenotazione. Riprova")
+                return redirect(url_for('main.index'))
 
             # creo prenotazione
             book = Booking()

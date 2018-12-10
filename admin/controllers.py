@@ -40,10 +40,10 @@ def index():
             return redirect(url_for('admin.profilo'))
 
 
-@admin.route('/profilo', methods=['GET'])
+@admin.route('/profilo', methods=['GET', 'POST'])
 def profilo():
     if request.method == 'GET':
-        form = AddPlate(request.form)
+        form = AddPlate()
         user = User().query(User.uuid == session['user']['user_id']).fetch(1)[0]
         targhe = user.targa.split(",")
 
@@ -58,10 +58,7 @@ def profilo():
             targhe.remove(targa)
             user.targa = ','.join(targhe)
             user.put()
-            # form
-            form = AddPlate(request.form)
-            return render_template('admin/profilo.html', username=get_username(session),
-                                   form=form, targhe=targhe)
+
         elif command[0] == "add":
             targa = request.form['targa']
             user = User().query(User.email == session['user']['email']).fetch(1)[0]
@@ -77,13 +74,10 @@ def profilo():
                     user.put()
                 else:
                     flash("Targa precedentemente inserita!")
+        # attesa per salvataggio in database
+        time.sleep(1)
 
-            # form
-            form = AddPlate(request.form)
-
-        return render_template('admin/profilo.html', username=get_username(session),
-                                   form=form, targhe=targhe)
-
+        return redirect(url_for('admin.profilo'))
 
 @admin.route('/gestisci', methods=['GET', 'POST'])
 def gestisci():
@@ -172,7 +166,7 @@ def tariffe():
     # form
     form = FormTariffa()
 
-    tariffe = Tariffa.query().fetch()
+    tariffe = Tariffa.query().order(Tariffa.order).fetch()
     if len(tariffe) > 0:
         return render_template('admin/tariffe_admin.html', len=len(tariffe),
                                nomi_tariffe=[tar.tariffa for tar in tariffe],
