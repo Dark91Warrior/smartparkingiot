@@ -1,10 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
 
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Smart Parking</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Bootstrap core -->
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/jquery-3.3.1.js') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/popper.js') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='scripts/bootstrap.js') }}" rel="stylesheet">
+
+</head>
+
+<body>
+<div class="container">
+
+    <div class="row" style="background-color: #4D4D4F; text-align: center">
+
+        <div class="col-lg-12">
+            <h2 style="color: #FFFFFF"></h2>
+            <h2 style="color: #FFFFFF">Pagamento</h2>
+            <h2 style="color: #FFFFFF"></h2>
+
+        </div>
+    </div>
+
+
+    <div class="my-5">
+        <div class="row" style="margin-top: -15%">
+            <div class="col-12">
+                <br>
+                <h5 class="text-left">
+                    <b>Il parcheggio è stato occupato in data {{ data_inizio }}, ora {{ ora_inizio }}. <br>
+                        L'importo dovuto in
+                        data {{ data_fine }}, ora {{ ora_fine }}, è
+                        pari a {{ costo }} €. </b>
+                </h5>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+
+        <div class="row" style="margin-top: -5%">
+            <div class="col-12">
+                <br>
+                <h5 class="text-left">
+                    <b><u>Paga tramite carta di credito:</u></b>
+                </h5>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+
+        <div class="row" style="margin-top: 0%">
+            <div class="col-12">
+                <label for="exampleInputEmail1">Nome e Cognome Titolare:</label>
+                <input type="nome" class="form-control" id="exampleInputPassword1" placeholder="Es. Marco Uras">
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 2%">
+            <div class="col-12">
+                <label for="exampleInputEmail1">Numero Carta di Credito:</label>
+                <input type="nome" class="form-control" id="exampleInputPassword1"
+                       placeholder="Es. 0000-0000-0000-0000">
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 2%">
+            <div class="col-6">
+                <label for="exampleInputEmail1">Scadenza:</label>
+                <input type="nome" class="form-control" id="exampleInputPassword1"
+                       placeholder="Es. 11/23">
+            </div>
+
+            <div class="col-4 offset-2">
+                <label for="exampleInputEmail1">CVV:</label>
+                <input type="nome" class="form-control" id="exampleInputPassword1"
+                       placeholder="Es. 123">
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 4%; margin-bottom: 0%">
+            <div class="col-2"></div>
+            <div class="col-8 text-center">
+                <form method="POST" action="{{ url_for('main.paga') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-primary"
+                            style="background-color: #4D4D4F; border-color: #4D4D4F;
+                            "><b style="font-size: large">Paga</b>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="row" style="margin-top: -5%">
+            <div class="col-12">
+                <br>
+                <h5 class="text-left">
+                    <b><u>Oppure tramite PayPal:</u></b>
+                </h5>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+
+        <div class="row" style="margin-top: -9%">
+            <div class="col-md-3"></div>
+            <div class="col-md-6" style="text-align: center">
+                <div>
+                    <form action="{{ url_for('main.paga') }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="image" src="{{ url_for('static', filename='img/paypal.png') }}" class="img-fluid"
+                               alt="parking"
+                               height="60%" width="60%">
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: -2%; margin-bottom: 0%">
+            <div class="col-2"></div>
+            <div class="col-8 text-center">
+                <form method="GET" action="{{ url_for('main.index') }}">
+                    <button type="submit" class="btn btn-primary"
+                            style="background-color: #4D4D4F; border-color: #4D4D4F;
+                            "><b style="font-size: large">Back</b>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
 </body>
 </html>

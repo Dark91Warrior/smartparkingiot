@@ -4,10 +4,12 @@ from main.forms import AddPlate, Prenota, Violazione, ModPw, ConttataciForm
 from models.User_Model import User
 from models.Tariffe_Model import Tariffa
 from models.Parking_Model import Parking
+from models.Historic_Model import Historic
 from data_access import DataAccess as DA
 from models.Booking_Model import Booking
 from google.appengine.api import mail
 from utils.utils import publishMQTT
+from datetime import datetime
 import hashlib
 
 
@@ -247,8 +249,8 @@ def prenota():
             targhe = user.targa.split(',')
             targa = targhe[idx_targa - 1]
 
-            # send signal to arduino
-            if not publishMQTT(parking, "prenotazione"):
+            # send signal to arduino (p = prenotazione)
+            if not publishMQTT(parking, "p"):
                 flash("Errore nella prenotazione. Riprova")
                 return redirect(url_for('main.index'))
 
@@ -294,18 +296,68 @@ def violazione():
         return redirect(url_for('main.index'))
 
 
-#TODO finire pagamento
-@main.route('/paga', methods=['GET'])
+@main.route('/paga', methods=['GET', 'POST'])
 def paga():
     if request.method == 'GET':
         uuid = session['user']['user_id']
 
         prenotazione = Booking.query(Booking.uuid == uuid).order(-Booking.start).fetch(1)
 
-        if len(prenotazione) > 0 and prenotazione[0].stop is not None:
-            return render_template('user/paga.html')
+        if len(prenotazione) > 0:
+
+            if prenotazione[0].start is None:
+                return render_template('user/prenotazione_in_corso.html', username=get_username(session))
+            else:
+                data_inizio = prenotazione[0].start.date().strftime("%d-%m-%Y")
+                ora_inizio = prenotazione[0].start.time().strftime("%H:%M:%S")
+
+                fmt = '%Y-%m-%d %H:%M:%S'
+                dat_now = datetime.now()
+                datetime_str = dat_now.strftime(fmt)
+                prenotazione[0].stop = datetime.strptime(datetime_str, fmt)
+
+                data_fine = dat_now.strftime('%d-%m-%Y')
+                ora_fine = dat_now.strftime('%H:%M:%S')
+
+                usr = User().query(User.uuid == uuid).fetch(1)[0]
+                tar = Tariffa().query(Tariffa.tariffa == usr.tariffa).fetch(1)[0]
+                costo_tariffa = tar.prezzo
+
+                costo = round((prenotazione[0].stop - prenotazione[0].start).total_seconds()/3600 * costo_tariffa, 2)
+
+                prenotazione[0].costo = costo
+                prenotazione[0].put()
+
+                return render_template('user/paga.html', data_inizio=data_inizio,
+                                       ora_inizio=ora_inizio, data_fine=data_fine, ora_fine=ora_fine, costo=costo)
         else:
             return render_template('user/no_pagamenti.html', username=get_username(session))
+
+    if request.method == 'POST':
+        uuid = session['user']['user_id']
+        try:
+            # cerca prenotazione
+            book = Booking.query(Booking.uuid == uuid).order(-Booking.start).fetch(1)[0]
+
+            # crea storico prenotazione
+            hist = Historic()
+            hist.uuid = uuid
+            hist.name = book.name
+            hist.surname = book.surname
+            hist.targa = book.targa
+            hist.start = book.start
+            hist.stop = book.stop
+            hist.parking = book.parking
+            hist.costo = book.costo
+            hist.put()
+
+            # cancella prenotazione
+            book.key.delete()
+
+            flash('Pagamento effettuato correttamente')
+        except:
+            flash('Errore nel pagamento. Riprova')
+        return redirect(url_for('main.index'))
 
 
 # cancellazione utente

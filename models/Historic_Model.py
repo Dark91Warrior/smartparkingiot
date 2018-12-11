@@ -1,7 +1,7 @@
 from google.appengine.ext import ndb
 
 
-class Booking(ndb.Model):
+class Historic(ndb.Model):
     uuid = ndb.StringProperty(required=True)
     name = ndb.StringProperty(required=True)
     surname = ndb.StringProperty(required=True)
