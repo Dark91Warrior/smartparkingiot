@@ -16,6 +16,12 @@ indexes:
   - name: start
     direction: desc
 
+- kind: Booking
+  properties:
+  - name: parking
+  - name: start
+    direction: desc
+
 - kind: Tariffa
   properties:
   - name: visibilita

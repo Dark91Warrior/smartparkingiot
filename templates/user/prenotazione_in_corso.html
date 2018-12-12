@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <div class="container">
+<div class="container">
 
     <div class="row" style="background-color: #4D4D4F; text-align: center">
 
@@ -48,12 +48,25 @@
             <div class="col-md-8">
                 <br>
                 <h5 class="text-left" style="margin-top: -5%">
-                    Ciao <a class="text-primary">{{ username }}</a>, in questo momento hai prenotazione associata al tuo account.
+                    Ciao <a class="text-primary">{{ username }}</a>, in questo momento hai prenotazione nel parcheggio
+                    <b>{{ parking }}</b>. <br>
                     Ricorda che hai 15 minuti per occupare il parcheggio, diversamente la prenotazione verrà annullata.
                 </h5>
                 <hr>
             </div>
             <div class="col-md-2"></div>
+        </div>
+
+        <div class="row" style="margin-top: 3%; margin-bottom: 3%">
+            <div class="col-2"></div>
+            <div class="col-8 text-center">
+                <form method="GET" action="{{ url_for('main.cancella_prenotazione') }}">
+                    <button type="submit" class="btn btn-primary"
+                            style="background-color: #4D4D4F; border-color: #4D4D4F;
+                            "><b style="font-size: large">Cancella</b>
+                    </button>
+                </form>
+            </div>
         </div>
 
         <div class="row" style="margin-top: 3%; margin-bottom: 3%">
@@ -69,6 +82,6 @@
         </div>
 
     </div>
-    </div>
+</div>
 </body>
 </html>

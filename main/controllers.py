@@ -233,6 +233,17 @@ def prenota():
             return redirect(url_for('main.index'))
 
     elif request.method == 'POST':
+
+        # check if exist a booking
+        uuid = session['user']['user_id']
+        prenotazione = Booking.query(Booking.uuid == uuid).order(-Booking.start).fetch(1)
+        if len(prenotazione) > 0:
+            if prenotazione[0].start is None:
+                return render_template('user/prenotazione_in_corso.html', username=get_username(session),
+                                   parking=prenotazione[0].parking)
+            else:
+                return redirect(url_for('main.paga'))
+
         parking = request.form['parcheggio']
         piano = parking[0]
         numero = int(parking[1:])
@@ -296,6 +307,14 @@ def violazione():
         return redirect(url_for('main.index'))
 
 
+@main.route('/cancella_prenotazione', methods=['GET','POST'])
+def cancella_prenotazione():
+    uuid = session['user']['user_id']
+    Booking.query(Booking.uuid == uuid).order(-Booking.start).fetch(1)[0].key.delete()
+    flash("Prenotazione cancellata correttamente")
+    return redirect(url_for('main.index'))
+
+
 @main.route('/paga', methods=['GET', 'POST'])
 def paga():
     if request.method == 'GET':
@@ -306,7 +325,8 @@ def paga():
         if len(prenotazione) > 0:
 
             if prenotazione[0].start is None:
-                return render_template('user/prenotazione_in_corso.html', username=get_username(session))
+                return render_template('user/prenotazione_in_corso.html', username=get_username(session),
+                                       parking=prenotazione[0].parking)
             else:
                 data_inizio = prenotazione[0].start.date().strftime("%d-%m-%Y")
                 ora_inizio = prenotazione[0].start.time().strftime("%H:%M:%S")
