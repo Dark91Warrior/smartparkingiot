@@ -12,13 +12,13 @@ indexes:
 
 - kind: Booking
   properties:
-  - name: uuid
+  - name: parking
   - name: start
     direction: desc
 
 - kind: Booking
   properties:
-  - name: parking
+  - name: uuid
   - name: start
     direction: desc
 

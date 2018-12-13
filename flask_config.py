@@ -21,4 +21,5 @@ csrf = CSRFProtect(app)
 csrf.exempt("arduinoHandler.controllers.addParking")
 csrf.exempt("arduinoHandler.controllers.setParking")
 csrf.exempt("arduinoHandler.controllers.test_attuatore")
+csrf.exempt("arduinoHandler.controllers.attesa")
 

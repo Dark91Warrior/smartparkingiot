@@ -13,7 +13,7 @@ function test(parking) {
     document.getElementById('fuori_servizio').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
 
-    var URL = "/arduino/test_attuatore";
+    var URL = "/arduino/attesa";
 
     $.ajax({
         type: 'post',
