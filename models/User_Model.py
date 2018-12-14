@@ -1,6 +1,10 @@
 from google.appengine.ext import ndb
 from flask_login import UserMixin
 
+"""
+Model per la gestione degli utenti.
+"""
+
 class User(UserMixin, ndb.Model):
     uuid = ndb.StringProperty(required=True)
     nome = ndb.StringProperty()

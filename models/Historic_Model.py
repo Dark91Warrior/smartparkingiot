@@ -1,5 +1,8 @@
 from google.appengine.ext import ndb
 
+"""
+Model per lo storico delle prenotazioni.
+"""
 
 class Historic(ndb.Model):
     uuid = ndb.StringProperty(required=True)

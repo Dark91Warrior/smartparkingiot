@@ -3,12 +3,9 @@ import random
 import string
 from models.User_Model import User
 
-
-#############################
-#     Insert Functions      #
-#############################
-
-
+"""
+Funzioni per l'accesso ai dati in database o sessione
+"""
 
 #############################
 #       Get Functions       #
@@ -21,16 +18,11 @@ def get_users(is_valid=None):
     else:
         return User().query(User.is_valid == is_valid).fetch()
 
-
 def get_user(user_id):
     return User().query(User.uuid == user_id).fetch()
 
-
 def get_user_from_mail(mail):
     return User().query(User.email == mail).fetch()
-
-
-
 
 
 #############################
@@ -52,8 +44,6 @@ def reset_pwd(email):
         return (user[0], new_pwd, old_pwd)
     except:
         return (False)
-
-
 
 
 def update_user(user_id, type, form=None):
@@ -82,8 +72,6 @@ def update_user(user_id, type, form=None):
                 return 'Le password inserite sono diverse'
     except:
         return 'Errore'
-
-
 
 
 #############################
@@ -136,9 +124,3 @@ def change_targa(uuid, targa):
         return True
     except:
         return False
-
-####################################
-#              utils               #
-####################################
-
-

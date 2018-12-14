@@ -1,6 +1,11 @@
 from google.appengine.api import urlfetch
 import urllib
 
+"""
+Funzioni varie.
+"""
+
+# funzione di publish sul broker (dove staranno in ascolto gli arduino)
 def publishMQTT(parking, command):
     url = "http://tools.lysis-iot.com/MqttPublish/publish.php"
     topic = "smartparking/" + parking

@@ -1,5 +1,8 @@
 from google.appengine.ext import ndb
 
+"""
+Model per i Log d'accesso.
+"""
 
 class Log(ndb.Model):
     uuid = ndb.StringProperty()

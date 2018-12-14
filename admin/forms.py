@@ -1,6 +1,10 @@
 from wtforms import Form, StringField, validators, FloatField, PasswordField
 from wtforms.widgets import TextArea
 
+"""
+Form dell'area amministrazione.
+"""
+
 class FormTariffa(Form):
     nome = StringField('nome', [validators.DataRequired()])
     descrizione = StringField('descrizione', [validators.DataRequired(), validators.NumberRange(min=0, max=3)], widget=TextArea())

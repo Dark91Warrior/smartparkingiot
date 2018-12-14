@@ -4,12 +4,17 @@ from flask import render_template, jsonify
 from google.appengine.api import mail
 import yaml
 
+"""
+Funzioni comuni.
+"""
+
 DEFAULT_SENDER = 'cla.mar92@gmail.com'
 
+# restituisce nome utente
 def get_username(session):
     return session['user']['nome'].capitalize() + ' ' + session['user']['cognome'].capitalize()
 
-
+# invia la nuova password
 def send_reset_pwd(form):
     try:
         user_data = reset_pwd(form.email.data)
@@ -33,7 +38,7 @@ def send_reset_pwd(form):
 
         # send mail
         logging.warning(mail.send_mail(
-            sender="%s <%s>" % ('MCLab IMS', DEFAULT_SENDER),
+            sender="%s <%s>" % ('SmartParking', DEFAULT_SENDER),
             to="%s <%s>" % (data['name'], data['email']),
             subject="Recupero Password: %s" % (data['name']),
             body=data['message'],

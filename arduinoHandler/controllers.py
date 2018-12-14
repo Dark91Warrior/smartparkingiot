@@ -8,6 +8,9 @@ import time
 import json
 import logging
 
+"""
+Gestione comunicazione con gli arduino.
+"""
 
 arduino = Blueprint('arduino', __name__)
 
@@ -16,6 +19,7 @@ def index():
     return "Gestore dei parcheggi"
 
 
+# handler per creazione parcheggi
 @arduino.route('/addParking', methods=['POST'])
 def addParking():
     piano = request.args.get('level')
@@ -27,6 +31,7 @@ def addParking():
     return "Parcheggi piano " + str(piano) + " inseriti."
 
 
+# cambio stato di un parcheggio
 @arduino.route('/setParking', methods=['POST'])
 def setParking():
 
@@ -55,7 +60,7 @@ def setParking():
     logging.info("Hai ricevuto il comando: " + command + ", dal parcheggio: " + parking)
     return Response(status=200)
 
-
+# test arduino
 @arduino.route('/test_attuatore', methods=['POST'])
 def test_attuatore():
     parking = request.form['parking']
@@ -71,6 +76,8 @@ def test_attuatore():
     test.put()
     return Response(status=200)
 
+# attesa di dati dall'arduino (per il test).
+# Handler utilizzato dalla funzione Javascript in "static/script/test_attuatore.js"
 @arduino.route('/attesa', methods=['POST'])
 def attesa():
 

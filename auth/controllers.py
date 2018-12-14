@@ -11,13 +11,17 @@ from data_access import DataAccess as DA
 from models.Parking_Model import Parking
 from random import randint
 
+"""
+Sezione Login.
+"""
+
 auth = Blueprint('auth', __name__)
 
 ###################
 #    FUNCTIONS    #
 ###################
 
-
+# controllo utente e caricamento dati in sezione
 def login_user(form):
     try:
         user_data = User.query(User.email == form.email.data, User.password == hashlib.sha1(form.password.data).hexdigest()).fetch(1)
@@ -37,7 +41,7 @@ def login_user(form):
     except:
         return False
 
-
+# gestione Log accessi
 def logging(user_id, type):
     log = Log()
     log.uuid = str(uuid.uuid4())
@@ -49,7 +53,7 @@ def logging(user_id, type):
         log.action = "LOGOUT"
     log.put()
 
-
+# inserimento utente nel database
 def insert_user(form):
     try:
         check_user = User.query(User.email == form.email.data).fetch(1)
@@ -81,8 +85,10 @@ def insert_user(form):
 #    ENDPOINTS    #
 ###################
 
+# gestione sign in
 @auth.route('/sign', methods=['GET', 'POST'])
 def login():
+    # chiamata post -> controllo credenziali
     if request.method == 'POST':
         form = UserLoginForm(request.form)
         if form.validate():
@@ -91,30 +97,34 @@ def login():
                 if session['user']['active']:
                     logging(session['user']['user_id'], 'LOGIN')
                     if session['user']['superuser'] == True:
-                        return redirect(url_for('admin.index'))
+                        return redirect(url_for('admin.index')) #amministratore
 
-                    return redirect(url_for('main.index'))
+                    return redirect(url_for('main.index')) #utente comune
                 else:
                     session.pop('user', None)
-                    return render_template('login/not_allowed.html')
+                    return render_template('login/not_allowed.html') #utente non valido
             else:
                 flash('Invalid credentials!')
-                return render_template('login/login.html', form=form)
+                return render_template('login/login.html', form=form) #credenziali errate
+
+    # chiamata get -> controllo utente in sessione
     else:
         if 'user' in session:
             if session['user']['active']:
                 if session['user']['authenticated'] == True and session['user']['superuser'] == False:
-                    return redirect(url_for('main.index'))
+                    return redirect(url_for('main.index')) #utente comune
                 elif session['user']['authenticated'] == True and session['user']['superuser'] == True:
-                    return redirect(url_for('admin.index'))
+                    return redirect(url_for('admin.index')) #amministratore
             else:
-                return render_template('login/not_allowed.html')
+                return render_template('login/not_allowed.html') #utente non valido
 
-        return render_template('login/login.html', form=UserLoginForm())
+        return render_template('login/login.html', form=UserLoginForm()) #pagina log in
 
 
+# gestione registrazione
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    # caricamento dati provenienti dal form
     if request.method == 'POST':
         if request.form['password'] != request.form['confirm_password']:
             flash('Le password inserite sono diverse!')
@@ -128,20 +138,23 @@ def register():
             my_choices.append((str(i + 1), tar.tariffa))
         form.tariffa.choices = my_choices
 
+        # check form
         if form.validate():
             if insert_user(form):
                 return render_template('login/not_allowed.html')
             else:
                 flash('Registration error!')
                 return redirect(url_for('auth.register'))
+
+    # caricamento vista registrazione
     elif request.method == 'GET':
         form = UserRegistrationForm()
 
+        # aggiunta tariffe possibili
         tariffe = Tariffa.query(Tariffa.visibilita == True).order(Tariffa.order).fetch()
         my_choices = []
         for i, tar in enumerate(tariffe):
             my_choices.append((str(i + 1), tar.tariffa))
-
         form.tariffa.choices = my_choices
 
         if len(tariffe) > 0:
@@ -155,17 +168,19 @@ def register():
                                    descr_tariffe=["Tutti gratis, paliazzu!!"])
 
 
+# logout
 @auth.route('/logout')
 def logout():
     if 'user' in session:
         user = session['user']['user_id']
-        session.pop('user', None)
+        session.pop('user', None) #svuoto sessione
         logging(user, 'LOGOUT')
         return redirect(url_for('auth.login'))
     else:
         return redirect(url_for('auth.login'))
 
 
+# recupero password
 @auth.route('/pwd_recovery', methods=['GET', 'POST'])
 def pwd_recovery():
     if request.method == 'POST':
@@ -185,42 +200,7 @@ def pwd_recovery():
 #    ENDPOINTS PROVVISORI    #
 ##############################
 
-@auth.route('/auth_user', methods=['GET'])
-def auth_user():
-    if request.method == 'GET':
-        user = request.args.get('user').split("_")
-        name = user[0]
-        surname = user[1]
-        msg_del = DA.auth_user(name, surname)
-        flash(msg_del)
-        return redirect(url_for('auth.login'))
-
-
-@auth.route('/admin_user', methods=['GET'])
-def admin_user():
-    if request.method == 'GET':
-        user = request.args.get('user').split("_")
-        name = user[0]
-        surname = user[1]
-        msg_del = DA.admin_user(name, surname)
-        flash(msg_del)
-        return redirect(url_for('auth.login'))
-
-@auth.route('/add_admin', methods=['GET'])
-def add_admin():
-    if request.method == 'GET':
-        usr = User()
-        usr.nome = "Claudio"
-        usr.cognome = "Marche"
-        usr.uuid = str(uuid.uuid4())
-        usr.password = hashlib.sha1("ciaone").hexdigest()
-        usr.email = "cla.mar92@gmail.com"
-        usr.is_valid = True
-        usr.has_superuser = True
-        usr.put()
-        flash("Aggiunto amministratore")
-        return redirect(url_for('auth.login'))
-
+# /auth/add_data -> aggiunge i dati provvisori
 @auth.route('/add_data', methods=['GET'])
 def add_data():
     if request.method == 'GET':
@@ -236,12 +216,15 @@ def add_data():
         usr.is_valid = True
         usr.put()
 
+        #admin
         usr = User()
         usr.nome = "Claudio"
         usr.cognome = "Marche"
         usr.uuid = str(uuid.uuid4())
         usr.password = hashlib.sha1("ciaone").hexdigest()
         usr.email = "cla.mar92@gmail.com"
+        usr.tariffa = "Tariffa 1"
+        usr.targa = "GF6543"
         usr.is_valid = True
         usr.has_superuser = True
         usr.put()

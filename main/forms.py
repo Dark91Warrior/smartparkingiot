@@ -1,6 +1,10 @@
 from wtforms import Form, StringField, validators, SelectField, TextAreaField, PasswordField
 from wtforms.widgets import TextArea
 
+"""
+Form gestione utente.
+"""
+
 
 class AddPlate(Form):
     targa = StringField('targa', [validators.DataRequired(), validators.Length(min=4, max=10)])

@@ -1,6 +1,9 @@
 from wtforms import Form, StringField, PasswordField, validators, SelectField
 from models.Tariffe_Model import Tariffa
 
+"""
+Gestione dei form nelle pagine HTML
+"""
 
 class UserLoginForm(Form):
     email = StringField('email', [validators.DataRequired()])

@@ -8,9 +8,14 @@ from forms import FormTariffa, ModPw, AddPlate
 import time
 import hashlib
 
+"""
+Gestione amministrazione
+"""
+
 admin = Blueprint('admin', __name__)
 
-
+# controllo se l'utente e' presente in se4ssione (per non fare il login).
+# Prescinde l'utilizzo di cookies
 @admin.before_request
 def before_request():
     if 'user' not in session:
@@ -40,6 +45,7 @@ def index():
             return redirect(url_for('admin.profilo'))
 
 
+# area profilo
 @admin.route('/profilo', methods=['GET', 'POST'])
 def profilo():
     if request.method == 'GET':
@@ -48,7 +54,7 @@ def profilo():
         targhe = user.targa.split(",")
 
         return render_template('admin/profilo.html', username=get_username(session), form=form, targhe=targhe)
-
+    # gestione aggiungi o cancella targa
     elif request.method == 'POST':
         command = request.form['command'].split('_')
         if command[0] == "delete":
@@ -76,9 +82,10 @@ def profilo():
                     flash("Targa precedentemente inserita!")
         # attesa per salvataggio in database
         time.sleep(1)
-
         return redirect(url_for('admin.profilo'))
 
+
+# sezione gestisci
 @admin.route('/gestisci', methods=['GET', 'POST'])
 def gestisci():
     if request.method == 'GET':
@@ -86,6 +93,7 @@ def gestisci():
 
         parks = Parking().query(Parking.piano == piano).fetch()
 
+        # classi per i diversi bottoni
         try:
             list_for_view = [(str(park.number), "btn btn-danger" if park.stato == 'Occupato'
             else "btn btn-success" if park.stato == 'Libero'
@@ -117,6 +125,7 @@ def gestisci():
             return redirect(url_for('admin.index'))
 
 
+# gestione modifica stato parcheggio dall'area relativa al singolo parcheggio
 @admin.route('/parking', methods=['POST'])
 def parking():
     command = request.form['command']
@@ -126,7 +135,6 @@ def parking():
     numero = int(parking[1:])
 
     try:
-
         park = Parking().query(Parking.piano == piano, Parking.number == numero).fetch(1)
 
         if command == 'libera':
@@ -143,6 +151,7 @@ def parking():
         return redirect(url_for('admin.index'))
 
 
+# settaggio fuori servizio del singolo parcheggio
 @admin.route('/fuori_servizio', methods=['POST'])
 def fuori_servizio():
     parking = request.form['fuori_servzio']
@@ -161,6 +170,7 @@ def fuori_servizio():
         return redirect(url_for('admin.index'))
 
 
+# sezione tariffe
 @admin.route('/tariffe', methods=['GET'])
 def tariffe():
     # form
@@ -182,7 +192,7 @@ def tariffe():
                                form=form,
                                empty=True)
 
-
+# aggiungi una tariffa
 @admin.route('/add_tariffa', methods=['POST'])
 def add_tariffa():
     if request.method == 'POST':
@@ -211,6 +221,7 @@ def add_tariffa():
         return redirect(url_for('admin.tariffe'))
 
 
+# modifica stato tariffa (Visibile o Non Visibile)
 @admin.route('/mod_tariffa', methods=['POST'])
 def mod_tariffa():
     if request.method == 'POST':
@@ -230,6 +241,8 @@ def mod_tariffa():
         tar = Tariffa.query(Tariffa.tariffa == tariffa).fetch(1)[0]
         if comando == "aggiungi":
             tar.visibilita = True
+        # la tariffa non viene cancellata
+        # per non compromettere gli utenti che la utilizzano fin'ora
         elif comando == "cancella":
             tar.visibilita = False
 
@@ -272,15 +285,11 @@ def password():
             flash("Erroe nella modifica. Riprova piu' tardi.")
             return redirect(url_for('admin.index'))
 
-# modifica targa
+# modifica targa nella sezione profilo
 @admin.route('/mod_targa', methods=['POST'])
 def mod_targa():
     targa = request.form['targa']
     uuid = session['user']['user_id']
     if not DA.change_targa(uuid, targa):
         flash("Errore in modifica targa!")
-    form = AddPlate(request.form)
-    user = User().query(User.email == session['user']['email']).fetch(1)[0]
-    targhe = user.targa.split(",")
-    return render_template('admin/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
-                           form=form, targhe=targhe)
+    return redirect(url_for('admin.profilo'))

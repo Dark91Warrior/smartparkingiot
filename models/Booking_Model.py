@@ -1,5 +1,8 @@
 from google.appengine.ext import ndb
 
+"""
+Model per le prenotazione real-time.
+"""
 
 class Booking(ndb.Model):
     uuid = ndb.StringProperty(required=True)

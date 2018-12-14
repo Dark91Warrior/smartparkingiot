@@ -13,6 +13,10 @@ from datetime import datetime
 import hashlib
 
 
+"""
+Gestione area utenti.
+"""
+
 main = Blueprint('main', __name__)
 
 
@@ -33,8 +37,7 @@ def send_email(object, text):
     else:
         return False
 
-# Gestione utenti autenticati
-
+# controllo se l'utente e' in sessione (cookies) per non ripetere il login
 @main.before_request
 def before_request():
     if 'user' not in session:
@@ -81,7 +84,7 @@ def profilo():
         return render_template('user/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
                                form=form, tariffa=tariffa, descr_tariffa=descrizione, prezzo_tariffa=prezzo,
                                targhe=targhe)
-
+    # cancella o aggiungi targa nel profilo
     elif request.method == 'POST':
         command = request.form['command'].split('_')
         if command[0] == "delete":
@@ -91,10 +94,7 @@ def profilo():
             targhe.remove(targa)
             user.targa = ','.join(targhe)
             user.put()
-            # form
-            form = AddPlate(request.form)
-            return render_template('user/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
-                                   form=form, tariffa='Tariffa ' + str(user.tariffa), targhe=targhe)
+
         elif command[0] == "add":
             targa = request.form['targa']
             user = User().query(User.email == session['user']['email']).fetch(1)[0]
@@ -111,10 +111,7 @@ def profilo():
                 else:
                     flash("Targa precedentemente inserita!")
 
-            # form
-            form = AddPlate(request.form)
-            return render_template('user/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
-                                   form=form, tariffa='Tariffa ' + str(user.tariffa), targhe=targhe)
+        return redirect(url_for('main.profilo'))
 
 
 # modifica password
@@ -139,7 +136,7 @@ def password():
             flash("Erroe nella modifica. Riprova piu' tardi.")
             return redirect(url_for('main.index'))
 
-
+# sottosezione Contattaci nella sezione Profilo
 @main.route('/contattaci', methods=['GET','POST'])
 def contattaci():
     if request.method == 'GET':
@@ -155,8 +152,7 @@ def contattaci():
         flash("Comunicazione inviata correttamente")
         return redirect(url_for('main.profilo'))
 
-
-
+# sezione prenotazione
 @main.route('/parking', methods=['GET', 'POST'])
 def parking():
     if request.method == 'GET':
@@ -164,6 +160,7 @@ def parking():
 
         parks = Parking().query(Parking.piano == piano).fetch()
 
+        # classi dipendenti dallo stato del parcheggio, utili per la modifica dello stile dei bottoni
         try:
             list_for_view = [(str(park.number), "btn btn-danger" if park.stato == 'Occupato'
                                         else "btn btn-success" if park.stato == 'Libero'
@@ -205,6 +202,7 @@ def parking():
             return redirect(url_for('main.index'))
 
 
+# area per la gestione delle violazioni e della creazione delle prenotazioni
 @main.route('/prenota', methods=['GET','POST'])
 def prenota():
     if request.method == 'GET':
@@ -232,8 +230,8 @@ def prenota():
 
             return redirect(url_for('main.index'))
 
+    # prenotazione
     elif request.method == 'POST':
-
         # check if exist a booking
         uuid = session['user']['user_id']
         prenotazione = Booking.query(Booking.uuid == uuid).order(-Booking.start).fetch(1)
@@ -282,6 +280,7 @@ def prenota():
             return redirect(url_for('main.index'))
 
 
+# gestione violazione non preimpostata (ma inserita dall'utente)
 @main.route('/violazione', methods=['GET','POST'])
 def violazione():
     if request.method == 'GET':
@@ -306,7 +305,7 @@ def violazione():
 
         return redirect(url_for('main.index'))
 
-
+# cancella prenotazione (se parcheggio non ancora occupato) dalla sezione Paga
 @main.route('/cancella_prenotazione', methods=['GET','POST'])
 def cancella_prenotazione():
     uuid = session['user']['user_id']
@@ -314,7 +313,7 @@ def cancella_prenotazione():
     flash("Prenotazione cancellata correttamente")
     return redirect(url_for('main.index'))
 
-
+# sezione Paga
 @main.route('/paga', methods=['GET', 'POST'])
 def paga():
     if request.method == 'GET':
@@ -343,6 +342,7 @@ def paga():
                 tar = Tariffa().query(Tariffa.tariffa == usr.tariffa).fetch(1)[0]
                 costo_tariffa = tar.prezzo
 
+                # calcolo del costo di permanenza del veicolo
                 costo = round((prenotazione[0].stop - prenotazione[0].start).total_seconds()/3600 * costo_tariffa, 2)
 
                 prenotazione[0].costo = costo
@@ -374,6 +374,7 @@ def paga():
             # cancella prenotazione
             book.key.delete()
 
+            # pagamento fittizio
             flash('Pagamento effettuato correttamente')
         except:
             flash('Errore nel pagamento. Riprova')
@@ -399,11 +400,7 @@ def mod_targa():
     uuid = session['user']['user_id']
     if not DA.change_targa(uuid, targa):
         flash("Errore in modifica targa!")
-    form = AddPlate(request.form)
-    user = User().query(User.email == session['user']['email']).fetch(1)[0]
-    targhe = user.targa.split(",")
-    return render_template('user/profilo.html', username=get_username(session), is_admin=session['user']['superuser'],
-                           form=form, tariffa='Tariffa ' + str(user.tariffa), targhe=targhe)
+    return redirect(url_for('main.profilo'))
 
 
 
